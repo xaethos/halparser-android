@@ -1,0 +1,3 @@
+[submodule "submodules/halbuilder-test-resources"]
+	path = submodules/halbuilder-test-resources
+	url = git://github.com/HalBuilder/halbuilder-test-resources.git
