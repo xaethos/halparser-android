@@ -1,6 +1,7 @@
 package net.xaethos.android.halparser.impl;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -11,10 +12,11 @@ public class BaseHALResource implements HALResource
 {
 
     private final HALEnclosure mEnclosure;
-    private final Map<String, Object> mProperties = new LinkedHashMap<String, Object>();
+    private final Map<String, Object> mProperties;
 
-    private BaseHALResource(HALEnclosure enclosure) {
+    private BaseHALResource(HALEnclosure enclosure, Map<String, Object> properties) {
         mEnclosure = enclosure;
+        mProperties = properties;
     }
 
     @Override
@@ -37,25 +39,29 @@ public class BaseHALResource implements HALResource
         return mProperties.get(name);
     }
 
+    @Override
+    public Map<String, Object> getProperties() {
+        return mProperties;
+    }
+
     // ***** Inner classes
 
     public static class Builder
     {
 
-        private BaseHALResource mResource;
+        private final HALEnclosure mEnclosure;
+        private final LinkedHashMap<String, Object> mProperties = new LinkedHashMap<String, Object>();
 
         public Builder(HALEnclosure enclosure) {
-            mResource = new BaseHALResource(enclosure);
+            mEnclosure = enclosure;
         }
 
         public HALResource build() {
-            HALResource resource = mResource;
-            mResource = null;
-            return resource;
+            return new BaseHALResource(mEnclosure, Collections.unmodifiableMap(mProperties));
         }
 
         public Builder putProperty(String name, Object value) {
-            mResource.mProperties.put(name, value);
+            mProperties.put(name, value);
             return this;
         }
 

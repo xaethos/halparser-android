@@ -3,6 +3,7 @@ package net.xaethos.android.halparser;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
+import java.util.Map;
 
 import net.xaethos.android.halparser.tests.R;
 import android.test.AndroidTestCase;
@@ -43,6 +44,28 @@ public class HALJsonExampleParsingTest extends AndroidTestCase
         assertEquals(123456, resource.getProperty("id"));
         assertEquals("Example Resource", resource.getProperty("name"));
         assertEquals(true, resource.getProperty("optional"));
+    }
+
+    public void testPropertiesMap() throws Exception {
+        resource = newResource(R.raw.example);
+
+        Map<String, Object> properties = resource.getProperties();
+        String[] names = new String[5];
+        names = properties.keySet().toArray(names);
+        assertEquals(5, names.length);
+        assertEquals("age", names[0]);
+        assertEquals("expired", names[1]);
+        assertEquals("id", names[2]);
+        assertEquals("name", names[3]);
+        assertEquals("optional", names[4]);
+
+        try {
+            properties.put("age", 42);
+            fail("Properties should be immutable");
+        }
+        catch (UnsupportedOperationException e) {
+            // All is good
+        }
     }
 
     // *** Helpers

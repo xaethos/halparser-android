@@ -15,6 +15,8 @@ public class HALJsonParser implements HALEnclosure
 {
     private final URI mURI;
 
+    private static final String LINKS = "_links";
+
     public HALJsonParser(URI baseURI) {
         if (!baseURI.isAbsolute()) throw new IllegalArgumentException("Base URI must be absolute");
         mURI = baseURI;
@@ -49,7 +51,13 @@ public class HALJsonParser implements HALEnclosure
 
         reader.beginObject();
         while (reader.peek() == JsonToken.NAME) {
-            builder.putProperty(reader.nextName(), parseValue(reader));
+            String name = reader.nextName();
+            if (LINKS.equals(name)) {
+                reader.skipValue();
+            }
+            else {
+                builder.putProperty(name, parseValue(reader));
+            }
         }
         reader.endObject();
 
