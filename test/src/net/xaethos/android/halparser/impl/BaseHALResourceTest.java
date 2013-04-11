@@ -21,7 +21,7 @@ public class BaseHALResourceTest extends AndroidTestCase
     }
 
     public void testProperty() {
-        resource = builder.putString("foo", "bar").build();
+        resource = builder.putProperty("foo", "bar").build();
         assertEquals("bar", resource.getProperty("foo"));
     }
 

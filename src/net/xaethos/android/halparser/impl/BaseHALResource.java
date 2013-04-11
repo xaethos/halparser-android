@@ -54,7 +54,7 @@ public class BaseHALResource implements HALResource
             return resource;
         }
 
-        public Builder putString(String name, String value) {
+        public Builder putProperty(String name, Object value) {
             mResource.mProperties.put(name, value);
             return this;
         }

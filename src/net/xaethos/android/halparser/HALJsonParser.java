@@ -3,6 +3,9 @@ package net.xaethos.android.halparser;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 
 import net.xaethos.android.halparser.impl.BaseHALResource;
 import android.util.JsonReader;
@@ -43,14 +46,54 @@ public class HALJsonParser implements HALEnclosure
 
     private HALResource parseResource(JsonReader reader, HALEnclosure parent) throws IOException {
         BaseHALResource.Builder builder = new BaseHALResource.Builder(parent);
-        reader.beginObject();
 
+        reader.beginObject();
         while (reader.peek() == JsonToken.NAME) {
-            builder.putString(reader.nextName(), reader.nextString());
+            builder.putProperty(reader.nextName(), parseValue(reader));
         }
         reader.endObject();
 
         return builder.build();
+    }
+
+    private Object parseValue(JsonReader reader) throws IOException {
+        switch (reader.peek()) {
+        case BEGIN_ARRAY:
+            reader.beginArray();
+            ArrayList<Object> array = new ArrayList<Object>();
+            while (reader.peek() != JsonToken.END_ARRAY)
+                array.add(parseValue(reader));
+            reader.endArray();
+            return Collections.unmodifiableList(array);
+
+        case BEGIN_OBJECT:
+            reader.beginObject();
+            LinkedHashMap<String, Object> object = new LinkedHashMap<String, Object>();
+            while (reader.peek() == JsonToken.NAME)
+                object.put(reader.nextName(), parseValue(reader));
+            reader.endObject();
+            return Collections.unmodifiableMap(object);
+
+        case BOOLEAN:
+            return reader.nextBoolean();
+
+        case NUMBER:
+            try {
+                return reader.nextInt();
+            }
+            catch (NumberFormatException e) {
+                try {
+                    return reader.nextLong();
+                }
+                catch (NumberFormatException e2) {
+                    return reader.nextDouble();
+                }
+            }
+
+        case STRING:
+        default:
+            return reader.nextString();
+        }
     }
 
 }
