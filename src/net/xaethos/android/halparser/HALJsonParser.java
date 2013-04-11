@@ -3,6 +3,8 @@ package net.xaethos.android.halparser;
 import java.io.Reader;
 import java.net.URI;
 
+import net.xaethos.android.halparser.impl.BaseHALResource;
+
 public class HALJsonParser implements HALEnclosure
 {
     private final URI mURI;
@@ -27,23 +29,7 @@ public class HALJsonParser implements HALEnclosure
     }
 
     public HALResource parse(Reader reader) {
-        return new HALResource() {
-
-            @Override
-            public HALEnclosure getEnclosure() {
-                return HALJsonParser.this;
-            }
-
-            @Override
-            public URI getBaseURI() {
-                return mURI;
-            }
-
-            @Override
-            public HALResource getParent() {
-                return null;
-            }
-        };
+        return new BaseHALResource.Builder(this).build();
     }
 
 }
