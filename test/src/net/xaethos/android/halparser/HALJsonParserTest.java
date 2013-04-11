@@ -1,5 +1,6 @@
 package net.xaethos.android.halparser;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 
@@ -36,7 +37,7 @@ public class HALJsonParserTest extends AndroidTestCase
         assertEquals(exampleURI, parser.getBaseURI());
     }
 
-    public void testParseSmoke() {
+    public void testParseSmoke() throws IOException {
         assertNotNull(getParser().parse(new StringReader("{}")));
     }
 
@@ -59,7 +60,13 @@ public class HALJsonParserTest extends AndroidTestCase
     }
 
     private HALResource getResource() {
-        return resource != null ? resource : (resource = getParser().parse(new StringReader("{}")));
+        try {
+            return resource != null ? resource : (resource = getParser().parse(new StringReader("{}")));
+        }
+        catch (Exception e) {
+            fail("Error parsing resource");
+            return null;
+        }
     }
 
 }
