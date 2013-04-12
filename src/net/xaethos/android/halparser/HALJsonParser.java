@@ -17,6 +17,7 @@ public class HALJsonParser implements HALEnclosure
     private final URI mURI;
 
     private static final String LINKS = "_links";
+    private static final String EMBEDDED = "_embedded";
 
     public HALJsonParser(URI baseURI) {
         if (!baseURI.isAbsolute()) throw new IllegalArgumentException("Base URI must be absolute");
@@ -39,7 +40,7 @@ public class HALJsonParser implements HALEnclosure
 
     public HALResource parse(Reader reader) throws IOException {
         JsonReader jsonReader = new JsonReader(reader);
-        HALResource resource = parseResource(jsonReader, this);
+        HALResource resource = parseResource(jsonReader, new BaseHALResource.Builder(this));
         jsonReader.close();
 
         return resource;
@@ -47,14 +48,15 @@ public class HALJsonParser implements HALEnclosure
 
     // *** Helper methods
 
-    private HALResource parseResource(JsonReader reader, HALEnclosure parent) throws IOException {
-        BaseHALResource.Builder builder = new BaseHALResource.Builder(parent);
-
+    private HALResource parseResource(JsonReader reader, BaseHALResource.Builder builder) throws IOException {
         reader.beginObject();
         while (reader.peek() == JsonToken.NAME) {
             String name = reader.nextName();
             if (LINKS.equals(name)) {
                 parseLinks(reader, builder);
+            }
+            else if (EMBEDDED.equals(name)) {
+                parseEmbedded(reader, builder);
             }
             else {
                 builder.putProperty(name, parseValue(reader));
@@ -136,6 +138,24 @@ public class HALJsonParser implements HALEnclosure
         reader.endObject();
 
         return builder.build();
+    }
+
+    private void parseEmbedded(JsonReader reader, BaseHALResource.Builder builder) throws IOException {
+        reader.beginObject();
+        while (reader.peek() == JsonToken.NAME) {
+            String rel = reader.nextName();
+            if (reader.peek() == JsonToken.BEGIN_ARRAY) {
+                reader.beginArray();
+                while (reader.peek() != JsonToken.END_ARRAY) {
+                    builder.putResource(parseResource(reader, builder.buildResource()), rel);
+                }
+                reader.endArray();
+            }
+            else {
+                builder.putResource(parseResource(reader, builder.buildResource()), rel);
+            }
+        }
+        reader.endObject();
     }
 
 }

@@ -85,6 +85,7 @@ public class HALJsonExampleParsingTest extends AndroidTestCase
         assertNotNull(link);
         assertEquals("self", link.getRel());
         assertEquals("https://example.com/api/customer/123456", link.getHref());
+
         assertSame(resource, link.getResource());
     }
 
@@ -102,7 +103,7 @@ public class HALJsonExampleParsingTest extends AndroidTestCase
         assertEquals("https://example.com/apidocs/accounts", resource.getLink("curie").getHref());
     }
 
-    public void testResourceRels() throws Exception {
+    public void testLinkRels() throws Exception {
         resource = newResource(R.raw.example);
 
         Set<String> relSet = resource.getLinkRels();
@@ -126,6 +127,55 @@ public class HALJsonExampleParsingTest extends AndroidTestCase
         assertEquals("bob", link.getAttribute("name"));
         assertEquals("The Parent", link.getAttribute("title"));
         assertEquals("en", link.getAttribute("hreflang"));
+    }
+
+    public void testExampleWithSubresource() throws Exception {
+        resource = newResource(R.raw.example_with_subresource);
+        HALResource subresource = resource.getResource("ns:user");
+
+        assertNotNull(subresource);
+        assertTrue(resource.getProperties().isEmpty());
+
+        assertEquals(32, subresource.getProperty("age"));
+        assertEquals(false, subresource.getProperty("expired"));
+        assertEquals(11, subresource.getProperty("id"));
+        assertEquals("Example User", subresource.getProperty("name"));
+        assertEquals(true, subresource.getProperty("optional"));
+
+        assertSame(resource, subresource.getParent());
+        assertSame(resource, subresource.getEnclosure());
+    }
+
+    public void testExampleWithSubresourceArrays() throws Exception {
+        resource = newResource(R.raw.example_with_multiple_subresources);
+        List<HALResource> subresources;
+        subresources = resource.getResources("ns:user");
+        assertNotNull(subresources);
+        assertEquals(2, subresources.size());
+        assertEquals("https://example.com/user/11", subresources.get(0).getLink("self").getHref());
+        assertEquals("https://example.com/user/12", subresources.get(1).getLink("self").getHref());
+
+        assertUnmodifiable(subresources);
+
+        assertEquals("https://example.com/user/11", resource.getResource("ns:user").getLink("self").getHref());
+    }
+
+    public void testSubresourceRels() throws Exception {
+        resource = newResource(R.raw.example_with_multiple_subresources);
+
+        Set<String> relSet = resource.getResourceRels();
+        assertUnmodifiable(relSet);
+
+        String[] rels = new String[1];
+        rels = relSet.toArray(rels);
+
+        assertEquals(1, rels.length);
+        assertEquals("ns:user", rels[0]);
+    }
+
+    public void testNestedSubresources() throws Exception {
+        resource = newResource(R.raw.example_with_multiple_nested_subresources);
+        assertEquals("555-666-7890", resource.getResource("ns:user").getResource("phone:cell").getProperty("number"));
     }
 
     // *** Helpers

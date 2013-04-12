@@ -19,4 +19,10 @@ public interface HALResource extends HALEnclosure
 
     public Set<String> getLinkRels();
 
+    public HALResource getResource(String rel);
+
+    public List<HALResource> getResources(String rel);
+
+    public Set<String> getResourceRels();
+
 }

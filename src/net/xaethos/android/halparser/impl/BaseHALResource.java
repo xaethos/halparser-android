@@ -18,6 +18,7 @@ public class BaseHALResource implements HALResource
     private final HALEnclosure mEnclosure;
     private final LinkedHashMap<String, Object> mProperties = new LinkedHashMap<String, Object>();
     private final LinkedHashMap<String, ArrayList<HALLink>> mLinks = new LinkedHashMap<String, ArrayList<HALLink>>();
+    private final LinkedHashMap<String, ArrayList<HALResource>> mResources = new LinkedHashMap<String, ArrayList<HALResource>>();
 
     private BaseHALResource(HALEnclosure enclosure) {
         mEnclosure = enclosure;
@@ -35,7 +36,7 @@ public class BaseHALResource implements HALResource
 
     @Override
     public HALResource getParent() {
-        return null;
+        return (HALResource) (mEnclosure instanceof HALResource ? mEnclosure : null);
     }
 
     @Override
@@ -50,9 +51,7 @@ public class BaseHALResource implements HALResource
 
     @Override
     public HALLink getLink(String rel) {
-        ArrayList<HALLink> links = mLinks.get(rel);
-        if (links != null && !links.isEmpty()) return links.get(0);
-        return null;
+        return getFirst(mLinks, rel);
     }
 
     @Override
@@ -63,6 +62,29 @@ public class BaseHALResource implements HALResource
     @Override
     public Set<String> getLinkRels() {
         return Collections.unmodifiableSet(mLinks.keySet());
+    }
+
+    @Override
+    public HALResource getResource(String rel) {
+        return getFirst(mResources, rel);
+    }
+
+    @Override
+    public List<HALResource> getResources(String rel) {
+        return Collections.unmodifiableList(mResources.get(rel));
+    }
+
+    @Override
+    public Set<String> getResourceRels() {
+        return Collections.unmodifiableSet(mResources.keySet());
+    }
+
+    // *** Helper methods
+
+    private <T> T getFirst(Map<String, ArrayList<T>> map, String key) {
+        ArrayList<T> list = map.get(key);
+        if (list != null && !list.isEmpty()) return list.get(0);
+        return null;
     }
 
     // ***** Inner classes
@@ -88,15 +110,11 @@ public class BaseHALResource implements HALResource
         }
 
         public Builder putLink(HALLink link) {
-            String rel = link.getRel();
+            return putLink(link, link.getRel());
+        }
 
-            ArrayList<HALLink> linkList = mResource.mLinks.get(rel);
-            if (linkList == null) {
-                linkList = new ArrayList<HALLink>();
-                mResource.mLinks.put(rel, linkList);
-            }
-
-            linkList.add(link);
+        public Builder putLink(HALLink link, String rel) {
+            addContent(mResource.mLinks, link.getRel(), link);
             return this;
         }
 
@@ -106,6 +124,27 @@ public class BaseHALResource implements HALResource
 
         public BaseHALLink.Builder buildLink(String rel) {
             return buildLink().putAttribute(BaseHALLink.ATTR_REL, rel);
+        }
+
+        public Builder putResource(HALResource resource, String rel) {
+            addContent(mResource.mResources, rel, resource);
+            return this;
+        }
+
+        public BaseHALResource.Builder buildResource() {
+            return new BaseHALResource.Builder(mResource);
+        }
+
+        // *** Helpers
+
+        private <T> void addContent(LinkedHashMap<String, ArrayList<T>> map, String rel, T content) {
+            ArrayList<T> list = map.get(rel);
+            if (list == null) {
+                list = new ArrayList<T>();
+                map.put(rel, list);
+            }
+
+            list.add(content);
         }
 
     }
