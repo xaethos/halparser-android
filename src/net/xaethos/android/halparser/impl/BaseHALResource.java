@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.xaethos.android.halparser.HALEnclosure;
 import net.xaethos.android.halparser.HALLink;
@@ -57,6 +58,11 @@ public class BaseHALResource implements HALResource
     @Override
     public List<HALLink> getLinks(String rel) {
         return Collections.unmodifiableList(mLinks.get(rel));
+    }
+
+    @Override
+    public Set<String> getLinkRels() {
+        return Collections.unmodifiableSet(mLinks.keySet());
     }
 
     // ***** Inner classes

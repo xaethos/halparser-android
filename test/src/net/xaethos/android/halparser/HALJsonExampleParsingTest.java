@@ -5,6 +5,7 @@ import java.io.Reader;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.xaethos.android.halparser.tests.R;
 import android.test.AndroidTestCase;
@@ -97,6 +98,34 @@ public class HALJsonExampleParsingTest extends AndroidTestCase
         assertEquals("https://example.com/apidocs/roles", links.get(1).getHref());
 
         assertUnmodifiable(links);
+
+        assertEquals("https://example.com/apidocs/accounts", resource.getLink("curie").getHref());
+    }
+
+    public void testResourceRels() throws Exception {
+        resource = newResource(R.raw.example);
+
+        Set<String> relSet = resource.getLinkRels();
+        assertUnmodifiable(relSet);
+
+        String[] rels = new String[4];
+        rels = relSet.toArray(rels);
+
+        assertEquals(4, rels.length);
+        assertEquals("curie", rels[0]);
+        assertEquals("self", rels[1]);
+        assertEquals("ns:parent", rels[2]);
+        assertEquals("ns:users", rels[3]);
+    }
+
+    public void testLinkAttributes() throws Exception {
+        resource = newResource(R.raw.example);
+        HALLink link = resource.getLink("ns:parent");
+
+        assertEquals("https://example.com/api/customer/1234", link.getAttribute("href"));
+        assertEquals("bob", link.getAttribute("name"));
+        assertEquals("The Parent", link.getAttribute("title"));
+        assertEquals("en", link.getAttribute("hreflang"));
     }
 
     // *** Helpers
@@ -115,7 +144,7 @@ public class HALJsonExampleParsingTest extends AndroidTestCase
 
     void assertUnmodifiable(Collection<?> collection) {
         try {
-            collection.add(null);
+            collection.clear();
             fail("Collection should be unmodifiable");
         }
         catch (UnsupportedOperationException e) {

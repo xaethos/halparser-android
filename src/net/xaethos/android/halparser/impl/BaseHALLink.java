@@ -13,13 +13,13 @@ public class BaseHALLink implements HALLink
     private final HALResource mResource;
     private final String mRel;
     private final String mHref;
+    private final HashMap<String, Object> mAttributes;
 
-    // private final Map<String, Object> mProperties;
-
-    private BaseHALLink(HALResource resource, String rel, String href) {
+    private BaseHALLink(HALResource resource, HashMap<String, Object> attributes) {
         mResource = resource;
-        mRel = rel;
-        mHref = href;
+        mRel = attributes.get(ATTR_REL).toString();
+        mHref = attributes.get(ATTR_HREF).toString();
+        mAttributes = attributes;
     }
 
     @Override
@@ -38,25 +38,25 @@ public class BaseHALLink implements HALLink
     }
 
     @Override
-    public String getAttribute(String name) {
-        return null;
+    public Object getAttribute(String name) {
+        return mAttributes.get(name);
     }
 
     public static class Builder
     {
         private final HALResource mResource;
-        private final HashMap<String, Object> mProperties = new HashMap<String, Object>();
+        private final HashMap<String, Object> mAttrs = new HashMap<String, Object>();
 
         public Builder(HALResource resource) {
             mResource = resource;
         }
 
         public HALLink build() {
-            return new BaseHALLink(mResource, (String) mProperties.get(ATTR_REL), (String) mProperties.get(ATTR_HREF));
+            return new BaseHALLink(mResource, mAttrs);
         }
 
         public Builder putAttribute(String name, Object value) {
-            mProperties.put(name, value);
+            mAttrs.put(name, value);
             return this;
         }
 

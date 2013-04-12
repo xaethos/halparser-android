@@ -9,6 +9,6 @@ public interface HALLink
 
     public String getHref();
 
-    public String getAttribute(String name);
+    public Object getAttribute(String name);
 
 }
