@@ -85,6 +85,10 @@ public class HALJsonParser implements HALEnclosure
         case BOOLEAN:
             return reader.nextBoolean();
 
+        case NULL:
+            reader.nextNull();
+            return null;
+
         case NUMBER:
             try {
                 return reader.nextInt();

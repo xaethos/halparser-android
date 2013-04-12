@@ -2,6 +2,7 @@ package net.xaethos.android.halparser;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +35,8 @@ public class HALJsonExampleParsingTest extends AndroidTestCase
         assertEquals("one", list.get(0));
         assertEquals("two", list.get(1));
         assertEquals("three", list.get(2));
+
+        assertUnmodifiable(list);
     }
 
     public void testExampleWithProperties() throws Exception {
@@ -44,6 +47,18 @@ public class HALJsonExampleParsingTest extends AndroidTestCase
         assertEquals(123456, resource.getProperty("id"));
         assertEquals("Example Resource", resource.getProperty("name"));
         assertEquals(true, resource.getProperty("optional"));
+    }
+
+    public void testExampleWithNullProperty() throws Exception {
+        resource = newResource(R.raw.example_with_null_property);
+        assertEquals(null, resource.getProperty("nullprop"));
+    }
+
+    public void testExampleWithNumbers() throws Exception {
+        resource = newResource(R.raw.example_with_numbers);
+        assertEquals(42, resource.getProperty("int"));
+        assertEquals(9223372036854775807L, resource.getProperty("long"));
+        assertEquals(1.3, resource.getProperty("double"));
     }
 
     public void testPropertiesMap() throws Exception {
@@ -59,13 +74,7 @@ public class HALJsonExampleParsingTest extends AndroidTestCase
         assertEquals("name", names[3]);
         assertEquals("optional", names[4]);
 
-        try {
-            properties.put("age", 42);
-            fail("Properties should be immutable");
-        }
-        catch (UnsupportedOperationException e) {
-            // All is good
-        }
+        assertUnmodifiable(properties);
     }
 
     // *** Helpers
@@ -80,6 +89,26 @@ public class HALJsonExampleParsingTest extends AndroidTestCase
 
     HALResource newResource(int resId) throws Exception {
         return getParser().parse(newReader(resId));
+    }
+
+    void assertUnmodifiable(Collection<?> collection) {
+        try {
+            collection.add(null);
+            fail("Collection should be unmodifiable");
+        }
+        catch (UnsupportedOperationException e) {
+            // All is good
+        }
+    }
+
+    void assertUnmodifiable(Map<?, ?> map) {
+        try {
+            map.clear();
+            fail("Map should be unmodifiable");
+        }
+        catch (UnsupportedOperationException e) {
+            // All is good
+        }
     }
 
 }
