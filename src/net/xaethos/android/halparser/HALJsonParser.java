@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 
+import net.xaethos.android.halparser.impl.BaseHALLink;
 import net.xaethos.android.halparser.impl.BaseHALResource;
 import android.util.JsonReader;
 import android.util.JsonToken;
@@ -53,7 +54,7 @@ public class HALJsonParser implements HALEnclosure
         while (reader.peek() == JsonToken.NAME) {
             String name = reader.nextName();
             if (LINKS.equals(name)) {
-                reader.skipValue();
+                parseLinks(reader, builder);
             }
             else {
                 builder.putProperty(name, parseValue(reader));
@@ -106,6 +107,35 @@ public class HALJsonParser implements HALEnclosure
         default:
             return reader.nextString();
         }
+    }
+
+    private void parseLinks(JsonReader reader, BaseHALResource.Builder builder) throws IOException {
+        reader.beginObject();
+        while (reader.peek() == JsonToken.NAME) {
+            String rel = reader.nextName();
+
+            if (reader.peek() == JsonToken.BEGIN_ARRAY) {
+                reader.beginArray();
+                while (reader.peek() != JsonToken.END_ARRAY) {
+                    builder.putLink(parseLink(reader, builder.buildLink(rel)));
+                }
+                reader.endArray();
+            }
+            else {
+                builder.putLink(parseLink(reader, builder.buildLink(rel)));
+            }
+        }
+        reader.endObject();
+    }
+
+    private HALLink parseLink(JsonReader reader, BaseHALLink.Builder builder) throws IOException {
+        reader.beginObject();
+        while (reader.peek() == JsonToken.NAME) {
+            builder.putAttribute(reader.nextName(), parseValue(reader));
+        }
+        reader.endObject();
+
+        return builder.build();
     }
 
 }

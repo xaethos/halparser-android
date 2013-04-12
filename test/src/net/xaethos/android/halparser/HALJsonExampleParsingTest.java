@@ -77,6 +77,16 @@ public class HALJsonExampleParsingTest extends AndroidTestCase
         assertUnmodifiable(properties);
     }
 
+    public void testExampleWithLink() throws Exception {
+        resource = newResource(R.raw.example);
+        HALLink link;
+        link = resource.getLink("self");
+        assertNotNull(link);
+        assertEquals("self", link.getRel());
+        assertEquals("https://example.com/api/customer/123456", link.getHref());
+        assertSame(resource, link.getResource());
+    }
+
     // *** Helpers
 
     HALJsonParser getParser() {
