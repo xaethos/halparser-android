@@ -1,5 +1,6 @@
 package net.xaethos.android.halparser;
 
+import java.util.List;
 import java.util.Map;
 
 public interface HALResource extends HALEnclosure
@@ -12,5 +13,7 @@ public interface HALResource extends HALEnclosure
     public Map<String, Object> getProperties();
 
     public HALLink getLink(String rel);
+
+    public List<HALLink> getLinks(String rel);
 
 }
