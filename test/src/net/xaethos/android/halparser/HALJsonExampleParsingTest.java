@@ -1,20 +1,13 @@
 package net.xaethos.android.halparser;
 
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import net.xaethos.android.halparser.tests.R;
-import android.test.AndroidTestCase;
 
-public class HALJsonExampleParsingTest extends AndroidTestCase
+public class HALJsonExampleParsingTest extends HALParserTestCase
 {
-    HALJsonParser parser;
-    HALResource resource;
-
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -176,40 +169,6 @@ public class HALJsonExampleParsingTest extends AndroidTestCase
     public void testNestedSubresources() throws Exception {
         resource = newResource(R.raw.example_with_multiple_nested_subresources);
         assertEquals("555-666-7890", resource.getResource("ns:user").getResource("phone:cell").getProperty("number"));
-    }
-
-    // *** Helpers
-
-    HALJsonParser getParser() {
-        return parser != null ? parser : (parser = new HALJsonParser("http://example.com/"));
-    }
-
-    Reader newReader(int resId) {
-        return new InputStreamReader(getContext().getResources().openRawResource(resId));
-    }
-
-    HALResource newResource(int resId) throws Exception {
-        return getParser().parse(newReader(resId));
-    }
-
-    void assertUnmodifiable(Collection<?> collection) {
-        try {
-            collection.clear();
-            fail("Collection should be unmodifiable");
-        }
-        catch (UnsupportedOperationException e) {
-            // All is good
-        }
-    }
-
-    void assertUnmodifiable(Map<?, ?> map) {
-        try {
-            map.clear();
-            fail("Map should be unmodifiable");
-        }
-        catch (UnsupportedOperationException e) {
-            // All is good
-        }
     }
 
 }
