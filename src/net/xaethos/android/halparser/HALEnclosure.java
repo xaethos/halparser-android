@@ -2,7 +2,9 @@ package net.xaethos.android.halparser;
 
 import java.net.URI;
 
-public interface HALEnclosure
+import android.os.Parcelable;
+
+public interface HALEnclosure extends Parcelable
 {
 
     public URI getBaseURI();

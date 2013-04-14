@@ -11,6 +11,8 @@ import java.util.Set;
 import net.xaethos.android.halparser.HALEnclosure;
 import net.xaethos.android.halparser.HALLink;
 import net.xaethos.android.halparser.HALResource;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 public class BaseHALResource implements HALResource
 {
@@ -85,6 +87,35 @@ public class BaseHALResource implements HALResource
         ArrayList<T> list = map.get(key);
         if (list != null && !list.isEmpty()) return list.get(0);
         return null;
+    }
+
+    // *** Parcelable implementation
+
+    public static final Parcelable.Creator<BaseHALResource> CREATOR = new Creator<BaseHALResource>() {
+        @Override
+        public BaseHALResource createFromParcel(Parcel source) {
+            return new BaseHALResource(source);
+        }
+
+        @Override
+        public BaseHALResource[] newArray(int size) {
+            return new BaseHALResource[size];
+        }
+
+    };
+
+    public BaseHALResource(Parcel in) {
+        this((HALEnclosure) in.readParcelable(HALEnclosure.class.getClassLoader()));
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeParcelable(mEnclosure, flags);
     }
 
     // ***** Inner classes

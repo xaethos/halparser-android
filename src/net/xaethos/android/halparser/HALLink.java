@@ -1,6 +1,8 @@
 package net.xaethos.android.halparser;
 
-public interface HALLink
+import android.os.Parcelable;
+
+public interface HALLink extends Parcelable
 {
 
     public HALResource getResource();
