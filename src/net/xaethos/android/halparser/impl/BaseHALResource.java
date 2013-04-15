@@ -58,7 +58,7 @@ public class BaseHALResource implements HALResource
 
     @Override
     public List<HALLink> getLinks(String rel) {
-        return Collections.unmodifiableList(mLinks.get(rel));
+        return getAll(mLinks, rel);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class BaseHALResource implements HALResource
 
     @Override
     public List<HALResource> getResources(String rel) {
-        return Collections.unmodifiableList(mResources.get(rel));
+        return getAll(mResources, rel);
     }
 
     @Override
@@ -87,6 +87,15 @@ public class BaseHALResource implements HALResource
         ArrayList<T> list = map.get(key);
         if (list != null && !list.isEmpty()) return list.get(0);
         return null;
+    }
+
+    private <T> List<T> getAll(Map<String, ArrayList<T>> map, String key) {
+        if (map.containsKey(key)) {
+            return Collections.unmodifiableList(map.get(key));
+        }
+        else {
+            return Collections.emptyList();
+        }
     }
 
     // *** Parcelable implementation

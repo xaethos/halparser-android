@@ -9,32 +9,33 @@ import java.util.Map;
 
 import android.test.AndroidTestCase;
 
-public class HALParserTestCase extends AndroidTestCase {
+public class HALParserTestCase extends AndroidTestCase
+{
 
-    static final URI exampleURI = URI.create("http://example.com/");
+    protected static final URI exampleURI = URI.create("http://example.com/");
 
-    HALJsonParser parser;
-    HALResource resource;
+    protected HALJsonParser parser;
+    protected HALResource resource;
 
     // *** Helpers
 
-    HALJsonParser getParser() {
+    protected HALJsonParser getParser() {
         return parser != null ? parser : (parser = new HALJsonParser(exampleURI));
     }
 
-    Reader newReader(int resId) {
+    protected Reader newReader(int resId) {
         return new InputStreamReader(getContext().getResources().openRawResource(resId));
     }
 
-    HALResource newResource(String jsonString) throws Exception {
+    protected HALResource newResource(String jsonString) throws Exception {
         return getParser().parse(new StringReader(jsonString));
     }
 
-    HALResource newResource(int resId) throws Exception {
+    protected HALResource newResource(int resId) throws Exception {
         return getParser().parse(newReader(resId));
     }
 
-    void assertUnmodifiable(Collection<?> collection) {
+    protected void assertUnmodifiable(Collection<?> collection) {
         try {
             collection.clear();
             fail("Collection should be unmodifiable");
@@ -44,7 +45,7 @@ public class HALParserTestCase extends AndroidTestCase {
         }
     }
 
-    void assertUnmodifiable(Map<?, ?> map) {
+    protected void assertUnmodifiable(Map<?, ?> map) {
         try {
             map.clear();
             fail("Map should be unmodifiable");
