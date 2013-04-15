@@ -62,6 +62,15 @@ public class HALParcelablesTest extends HALParserTestCase
         assertEquals("https://example.com/apidocs/accounts", resource.getLink("curie").getHref());
     }
 
+    public void testParcelsSubresources() throws Exception {
+        resource = copyFromParceling(newResource(R.raw.example_with_subresource));
+        HALResource subresource = resource.getResource("ns:user");
+
+        assertThat(subresource, is(notNullValue()));
+        assertThat(subresource.getLink("self").getHref(), is("https://example.com/user/11"));
+        assertThat((Integer) subresource.getProperty("age"), is(32));
+    }
+
     // *** Helper methods
 
     protected <T extends Parcelable> T copyFromParceling(T original) {

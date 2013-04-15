@@ -107,12 +107,8 @@ public class BaseHALResource implements HALResource
         this(URI.create(in.readString()));
         in.readMap(mProperties, null);
 
-        int count = in.readInt();
-        while (count-- > 0) {
-            String rel = in.readString();
-            ArrayList<HALLink> list = new ArrayList<HALLink>(in.createTypedArrayList(BaseHALLink.CREATOR));
-            mLinks.put(rel, list);
-        }
+        readTypedArrayMap(in, mLinks, BaseHALLink.CREATOR);
+        readTypedArrayMap(in, mResources, BaseHALResource.CREATOR);
     }
 
     @Override
@@ -125,8 +121,25 @@ public class BaseHALResource implements HALResource
         out.writeString(mBaseURI.toString());
         out.writeMap(mProperties);
 
-        out.writeInt(mLinks.size());
-        for (Entry<String, ArrayList<HALLink>> entry : mLinks.entrySet()) {
+        writeTypedArrayMap(out, mLinks);
+        writeTypedArrayMap(out, mResources);
+    }
+
+    private <T extends Parcelable> void readTypedArrayMap(Parcel in,
+            LinkedHashMap<String, ArrayList<T>> map,
+            Parcelable.Creator<? extends T> creator)
+    {
+        int count = in.readInt();
+        while (count-- > 0) {
+            String rel = in.readString();
+            ArrayList<T> list = new ArrayList<T>(in.createTypedArrayList(creator));
+            map.put(rel, list);
+        }
+    }
+
+    private <T extends Parcelable> void writeTypedArrayMap(Parcel out, LinkedHashMap<String, ArrayList<T>> map) {
+        out.writeInt(map.size());
+        for (Entry<String, ArrayList<T>> entry : map.entrySet()) {
             out.writeString(entry.getKey());
             out.writeTypedList(entry.getValue());
         }
