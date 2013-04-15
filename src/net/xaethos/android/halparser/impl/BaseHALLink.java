@@ -1,27 +1,34 @@
 package net.xaethos.android.halparser.impl;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.Map;
 
 import net.xaethos.android.halparser.HALLink;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.scurrilous.uritemplate.URITemplate;
+
 public class BaseHALLink implements HALLink
 {
     public static final String ATTR_REL = "rel";
     public static final String ATTR_HREF = "href";
+    public static final String ATTR_TEMPLATED = "templated";
 
     private final URI mBaseURI;
     private final String mRel;
     private final String mHref;
     private final HashMap<String, Object> mAttributes;
+    private final URITemplate mTemplate;
 
     private BaseHALLink(URI baseURI, HashMap<String, Object> attributes) {
         mBaseURI = baseURI;
         mRel = attributes.get(ATTR_REL).toString();
         mHref = attributes.get(ATTR_HREF).toString();
         mAttributes = attributes;
+        mTemplate = new URITemplate(mHref);
     }
 
     @Override
@@ -40,8 +47,28 @@ public class BaseHALLink implements HALLink
     }
 
     @Override
+    public URI getURI() {
+        return URI.create(mHref);
+    }
+
+    @Override
+    public URI getURI(Map<String, Object> map) {
+        try {
+            return mTemplate.expand(map);
+        }
+        catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public Object getAttribute(String name) {
         return mAttributes.get(name);
+    }
+
+    @Override
+    public boolean isTemplated() {
+        return !mTemplate.getVariableNames().isEmpty();
     }
 
     // *** Parcelable implementation
@@ -67,6 +94,7 @@ public class BaseHALLink implements HALLink
         mRel = attributes.get(ATTR_REL).toString();
         mHref = attributes.get(ATTR_HREF).toString();
         mAttributes = attributes;
+        mTemplate = new URITemplate(mHref);
     }
 
     @Override

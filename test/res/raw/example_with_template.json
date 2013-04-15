@@ -16,6 +16,9 @@
       "title" : "The Parent",
       "hreflang" : "en"
     },
+    "ns:customer" : {
+      "href" : "https://example.com/api/customer/{id}"
+    },
     "ns:query" : {
       "href" : "https://example.com/api/customer/search{?queryParam}",
       "templated" : true
