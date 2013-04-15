@@ -106,6 +106,7 @@ public class BaseHALResource implements HALResource
 
     public BaseHALResource(Parcel in) {
         this((HALEnclosure) in.readParcelable(HALEnclosure.class.getClassLoader()));
+        in.readMap(mProperties, null);
     }
 
     @Override
@@ -116,6 +117,7 @@ public class BaseHALResource implements HALResource
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeParcelable(mEnclosure, flags);
+        out.writeMap(mProperties);
     }
 
     // ***** Inner classes
