@@ -77,9 +77,8 @@ public class HALJsonExampleParsingTest extends HALParserTestCase
         link = resource.getLink("self");
         assertNotNull(link);
         assertEquals("self", link.getRel());
+        assertEquals(exampleURI, link.getBaseURI());
         assertEquals("https://example.com/api/customer/123456", link.getHref());
-
-        assertSame(resource, link.getResource());
     }
 
     public void testExampleWithLinkArrays() throws Exception {
@@ -135,8 +134,7 @@ public class HALJsonExampleParsingTest extends HALParserTestCase
         assertEquals("Example User", subresource.getProperty("name"));
         assertEquals(true, subresource.getProperty("optional"));
 
-        assertSame(resource, subresource.getParent());
-        assertSame(resource, subresource.getEnclosure());
+        assertSame(resource.getBaseURI(), subresource.getBaseURI());
     }
 
     public void testExampleWithSubresourceArrays() throws Exception {

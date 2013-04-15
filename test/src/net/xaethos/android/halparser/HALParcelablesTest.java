@@ -3,8 +3,11 @@ package net.xaethos.android.halparser;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
+import java.util.List;
 import java.util.Map;
 
 import net.xaethos.android.halparser.tests.R;
@@ -29,7 +32,7 @@ public class HALParcelablesTest extends HALParserTestCase
     public void testParcelsProperties() throws Exception {
         resource = copyFromParceling(newResource(R.raw.example));
 
-        assertThat(resource.getEnclosure().getBaseURI(), is(exampleURI));
+        assertThat(resource.getBaseURI(), is(exampleURI));
         Map<String, Object> properties = resource.getProperties();
 
         assertThat(properties.keySet(), contains("age", "expired", "id", "name", "optional"));
@@ -41,6 +44,22 @@ public class HALParcelablesTest extends HALParserTestCase
 
         assertThat((Boolean) properties.get("expired"), is(false));
         assertThat((Boolean) properties.get("optional"), is(true));
+    }
+
+    public void testParcelsLinks() throws Exception {
+        resource = copyFromParceling(newResource(R.raw.example));
+
+        List<HALLink> links;
+        links = resource.getLinks("curie");
+        assertThat(links, is(notNullValue()));
+        assertThat(links, hasSize(2));
+        assertThat(links.get(0).getHref(), is("https://example.com/apidocs/accounts"));
+        assertThat(links.get(1).getHref(), is("https://example.com/apidocs/roles"));
+
+        assertUnmodifiable(links);
+
+        assertThat(resource.getLinkRels(), contains("curie", "self", "ns:parent", "ns:users"));
+        assertEquals("https://example.com/apidocs/accounts", resource.getLink("curie").getHref());
     }
 
     // *** Helper methods

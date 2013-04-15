@@ -1,9 +1,9 @@
 package net.xaethos.android.halparser.impl;
 
+import java.net.URI;
 import java.util.HashMap;
 
 import net.xaethos.android.halparser.HALLink;
-import net.xaethos.android.halparser.HALResource;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -12,21 +12,21 @@ public class BaseHALLink implements HALLink
     public static final String ATTR_REL = "rel";
     public static final String ATTR_HREF = "href";
 
-    private final HALResource mResource;
+    private final URI mBaseURI;
     private final String mRel;
     private final String mHref;
     private final HashMap<String, Object> mAttributes;
 
-    private BaseHALLink(HALResource resource, HashMap<String, Object> attributes) {
-        mResource = resource;
+    private BaseHALLink(URI baseURI, HashMap<String, Object> attributes) {
+        mBaseURI = baseURI;
         mRel = attributes.get(ATTR_REL).toString();
         mHref = attributes.get(ATTR_HREF).toString();
         mAttributes = attributes;
     }
 
     @Override
-    public HALResource getResource() {
-        return mResource;
+    public URI getBaseURI() {
+        return mBaseURI;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class BaseHALLink implements HALLink
     };
 
     public BaseHALLink(Parcel in) {
-        mResource = in.readParcelable(null);
+        mBaseURI = URI.create(in.readString());
 
         HashMap<String, Object> attributes = new HashMap<String, Object>();
         in.readMap(attributes, null);
@@ -76,7 +76,7 @@ public class BaseHALLink implements HALLink
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeParcelable(mResource, flags);
+        out.writeString(mBaseURI.toString());
         out.writeMap(mAttributes);
     }
 
@@ -84,15 +84,15 @@ public class BaseHALLink implements HALLink
 
     public static class Builder
     {
-        private final HALResource mResource;
+        private final URI mBaseURI;
         private final HashMap<String, Object> mAttrs = new HashMap<String, Object>();
 
-        public Builder(HALResource resource) {
-            mResource = resource;
+        public Builder(URI baseURI) {
+            mBaseURI = baseURI;
         }
 
         public HALLink build() {
-            return new BaseHALLink(mResource, mAttrs);
+            return new BaseHALLink(mBaseURI, mAttrs);
         }
 
         public Builder putAttribute(String name, Object value) {

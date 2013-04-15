@@ -10,10 +10,6 @@ public class HALJsonParserTest extends HALParserTestCase
         assertEquals(exampleURI, getParser().getBaseURI());
     }
 
-    public void testEnclosureIsNull() {
-        assertNull(getParser().getEnclosure());
-    }
-
     public void testBaseURIMustBeAbsolute() {
         URI relativeURI = URI.create("/index.html");
         try {
@@ -36,14 +32,6 @@ public class HALJsonParserTest extends HALParserTestCase
 
     public void testResourceBaseURI() throws Exception {
         assertEquals(exampleURI, getResource().getBaseURI());
-    }
-
-    public void testResourceEnclosure() throws Exception {
-        assertEquals(getParser(), getResource().getEnclosure());
-    }
-
-    public void testResourceParentIsNull() throws Exception {
-        assertNull(getResource().getParent());
     }
 
     // *** Helpers

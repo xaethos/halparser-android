@@ -14,7 +14,7 @@ import android.os.Parcelable;
 import android.util.JsonReader;
 import android.util.JsonToken;
 
-public class HALJsonParser implements HALEnclosure
+public class HALJsonParser implements Parcelable
 {
     private final URI mURI;
 
@@ -30,19 +30,13 @@ public class HALJsonParser implements HALEnclosure
         this(URI.create(baseURI));
     }
 
-    @Override
     public URI getBaseURI() {
         return mURI;
     }
 
-    @Override
-    public HALEnclosure getEnclosure() {
-        return null;
-    }
-
     public HALResource parse(Reader reader) throws IOException {
         JsonReader jsonReader = new JsonReader(reader);
-        HALResource resource = parseResource(jsonReader, new BaseHALResource.Builder(this));
+        HALResource resource = parseResource(jsonReader, new BaseHALResource.Builder(mURI));
         jsonReader.close();
 
         return resource;
@@ -162,7 +156,7 @@ public class HALJsonParser implements HALEnclosure
 
     // *** Parcelable implementation
 
-    public static final Parcelable.Creator<HALJsonParser> CREATOR = new Creator<HALJsonParser>() {
+    public static final Parcelable.Creator<HALJsonParser> CREATOR = new Parcelable.Creator<HALJsonParser>() {
         @Override
         public HALJsonParser createFromParcel(Parcel source) {
             return new HALJsonParser(source);

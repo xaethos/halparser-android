@@ -1,13 +1,16 @@
 package net.xaethos.android.halparser;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface HALResource extends HALEnclosure
+import android.os.Parcelable;
+
+public interface HALResource extends Parcelable
 {
 
-    public HALResource getParent();
+    public URI getBaseURI();
 
     public Object getProperty(String name);
 

@@ -6,9 +6,9 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
-import net.xaethos.android.halparser.HALEnclosure;
 import net.xaethos.android.halparser.HALLink;
 import net.xaethos.android.halparser.HALResource;
 import android.os.Parcel;
@@ -17,28 +17,18 @@ import android.os.Parcelable;
 public class BaseHALResource implements HALResource
 {
 
-    private final HALEnclosure mEnclosure;
+    private final URI mBaseURI;
     private final LinkedHashMap<String, Object> mProperties = new LinkedHashMap<String, Object>();
     private final LinkedHashMap<String, ArrayList<HALLink>> mLinks = new LinkedHashMap<String, ArrayList<HALLink>>();
     private final LinkedHashMap<String, ArrayList<HALResource>> mResources = new LinkedHashMap<String, ArrayList<HALResource>>();
 
-    private BaseHALResource(HALEnclosure enclosure) {
-        mEnclosure = enclosure;
+    private BaseHALResource(URI baseURI) {
+        mBaseURI = baseURI;
     }
 
     @Override
     public URI getBaseURI() {
-        return mEnclosure.getBaseURI();
-    }
-
-    @Override
-    public HALEnclosure getEnclosure() {
-        return mEnclosure;
-    }
-
-    @Override
-    public HALResource getParent() {
-        return (HALResource) (mEnclosure instanceof HALResource ? mEnclosure : null);
+        return mBaseURI;
     }
 
     @Override
@@ -101,6 +91,7 @@ public class BaseHALResource implements HALResource
     // *** Parcelable implementation
 
     public static final Parcelable.Creator<BaseHALResource> CREATOR = new Creator<BaseHALResource>() {
+
         @Override
         public BaseHALResource createFromParcel(Parcel source) {
             return new BaseHALResource(source);
@@ -110,12 +101,18 @@ public class BaseHALResource implements HALResource
         public BaseHALResource[] newArray(int size) {
             return new BaseHALResource[size];
         }
-
     };
 
     public BaseHALResource(Parcel in) {
-        this((HALEnclosure) in.readParcelable(HALEnclosure.class.getClassLoader()));
+        this(URI.create(in.readString()));
         in.readMap(mProperties, null);
+
+        int count = in.readInt();
+        while (count-- > 0) {
+            String rel = in.readString();
+            ArrayList<HALLink> list = new ArrayList<HALLink>(in.createTypedArrayList(BaseHALLink.CREATOR));
+            mLinks.put(rel, list);
+        }
     }
 
     @Override
@@ -125,8 +122,14 @@ public class BaseHALResource implements HALResource
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeParcelable(mEnclosure, flags);
+        out.writeString(mBaseURI.toString());
         out.writeMap(mProperties);
+
+        out.writeInt(mLinks.size());
+        for (Entry<String, ArrayList<HALLink>> entry : mLinks.entrySet()) {
+            out.writeString(entry.getKey());
+            out.writeTypedList(entry.getValue());
+        }
     }
 
     // ***** Inner classes
@@ -134,10 +137,12 @@ public class BaseHALResource implements HALResource
     public static class Builder
     {
 
+        private URI mBaseURI;
         private BaseHALResource mResource;
 
-        public Builder(HALEnclosure enclosure) {
-            mResource = new BaseHALResource(enclosure);
+        public Builder(URI baseURI) {
+            mBaseURI = baseURI;
+            mResource = new BaseHALResource(baseURI);
         }
 
         public HALResource build() {
@@ -161,7 +166,7 @@ public class BaseHALResource implements HALResource
         }
 
         public BaseHALLink.Builder buildLink() {
-            return new BaseHALLink.Builder(mResource);
+            return new BaseHALLink.Builder(mBaseURI);
         }
 
         public BaseHALLink.Builder buildLink(String rel) {
@@ -174,7 +179,7 @@ public class BaseHALResource implements HALResource
         }
 
         public BaseHALResource.Builder buildResource() {
-            return new BaseHALResource.Builder(mResource);
+            return new BaseHALResource.Builder(mBaseURI);
         }
 
         // *** Helpers
