@@ -9,10 +9,12 @@ import java.util.LinkedHashMap;
 
 import net.xaethos.android.halparser.impl.BaseHALLink;
 import net.xaethos.android.halparser.impl.BaseHALResource;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.JsonReader;
 import android.util.JsonToken;
 
-public class HALJsonParser implements HALEnclosure
+public class HALJsonParser implements Parcelable
 {
     private final URI mURI;
 
@@ -28,25 +30,19 @@ public class HALJsonParser implements HALEnclosure
         this(URI.create(baseURI));
     }
 
-    @Override
     public URI getBaseURI() {
         return mURI;
     }
 
-    @Override
-    public HALEnclosure getEnclosure() {
-        return null;
-    }
-
     public HALResource parse(Reader reader) throws IOException {
         JsonReader jsonReader = new JsonReader(reader);
-        HALResource resource = parseResource(jsonReader, new BaseHALResource.Builder(this));
+        HALResource resource = parseResource(jsonReader, new BaseHALResource.Builder(mURI));
         jsonReader.close();
 
         return resource;
     }
 
-    // *** Helper methods
+    // *** Parsing methods
 
     private HALResource parseResource(JsonReader reader, BaseHALResource.Builder builder) throws IOException {
         reader.beginObject();
@@ -156,6 +152,35 @@ public class HALJsonParser implements HALEnclosure
             }
         }
         reader.endObject();
+    }
+
+    // *** Parcelable implementation
+
+    public static final Parcelable.Creator<HALJsonParser> CREATOR = new Parcelable.Creator<HALJsonParser>() {
+        @Override
+        public HALJsonParser createFromParcel(Parcel source) {
+            return new HALJsonParser(source);
+        }
+
+        @Override
+        public HALJsonParser[] newArray(int size) {
+            return new HALJsonParser[size];
+        }
+
+    };
+
+    public HALJsonParser(Parcel in) {
+        this(in.readString());
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mURI.toString());
     }
 
 }
