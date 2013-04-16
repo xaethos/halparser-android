@@ -2,8 +2,10 @@ package net.xaethos.android.halparser.impl;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import net.xaethos.android.halparser.HALLink;
 import android.os.Parcel;
@@ -48,7 +50,8 @@ public class BaseHALLink implements HALLink
 
     @Override
     public URI getURI() {
-        return URI.create(mHref);
+        Map<String, Object> map = Collections.emptyMap();
+        return getURI(map);
     }
 
     @Override
@@ -64,6 +67,11 @@ public class BaseHALLink implements HALLink
     @Override
     public Object getAttribute(String name) {
         return mAttributes.get(name);
+    }
+
+    @Override
+    public Set<String> getVariables() {
+        return mTemplate.getVariableNames();
     }
 
     @Override
