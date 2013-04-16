@@ -11,17 +11,22 @@ import net.xaethos.android.halparser.impl.BaseHALLink;
 import net.xaethos.android.halparser.impl.BaseHALResource;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.JsonReader;
-import android.util.JsonToken;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 
 public class HALJsonParser implements Parcelable
 {
-    private final URI mURI;
-
     private static final String LINKS = "_links";
     private static final String EMBEDDED = "_embedded";
 
+    private final URI mURI;
+    private final JsonFactory mJsonFactory;
+
     public HALJsonParser(URI baseURI) {
+        mJsonFactory = new JsonFactory();
+
         if (!baseURI.isAbsolute()) throw new IllegalArgumentException("Base URI must be absolute");
         mURI = baseURI;
     }
@@ -35,123 +40,134 @@ public class HALJsonParser implements Parcelable
     }
 
     public HALResource parse(Reader reader) throws IOException {
-        JsonReader jsonReader = new JsonReader(reader);
-        HALResource resource = parseResource(jsonReader, new BaseHALResource.Builder(mURI));
-        jsonReader.close();
+        JsonParser jsonParser = mJsonFactory.createJsonParser(reader);
+        jsonParser.nextToken();
+        HALResource resource = parseResource(jsonParser, new BaseHALResource.Builder(mURI));
+        jsonParser.close();
 
         return resource;
     }
 
     // *** Parsing methods
 
-    private HALResource parseResource(JsonReader reader, BaseHALResource.Builder builder) throws IOException {
-        reader.beginObject();
-        while (reader.peek() == JsonToken.NAME) {
-            String name = reader.nextName();
+    private void verifyObject(JsonParser parser) throws IOException {
+        if (parser.getCurrentToken() != JsonToken.START_OBJECT) {
+            throw new IOException("Expected data to start with an Object");
+        }
+    }
+
+    private HALResource parseResource(JsonParser parser, BaseHALResource.Builder builder) throws IOException {
+        verifyObject(parser);
+        while (parser.nextToken() != JsonToken.END_OBJECT) {
+            String name = parser.getCurrentName();
+            parser.nextToken();
             if (LINKS.equals(name)) {
-                parseLinks(reader, builder);
+                parseLinks(parser, builder);
             }
             else if (EMBEDDED.equals(name)) {
-                parseEmbedded(reader, builder);
+                parseEmbedded(parser, builder);
             }
             else {
-                builder.putProperty(name, parseValue(reader));
+                builder.putProperty(name, parseValue(parser));
             }
         }
-        reader.endObject();
 
         return builder.build();
     }
 
-    private Object parseValue(JsonReader reader) throws IOException {
-        switch (reader.peek()) {
-        case BEGIN_ARRAY:
-            reader.beginArray();
+    private Object parseValue(JsonParser parser) throws IOException {
+        switch (parser.getCurrentToken()) {
+        case START_ARRAY:
             ArrayList<Object> array = new ArrayList<Object>();
-            while (reader.peek() != JsonToken.END_ARRAY)
-                array.add(parseValue(reader));
-            reader.endArray();
+            while (parser.nextToken() != JsonToken.END_ARRAY) {
+                array.add(parseValue(parser));
+            }
             return Collections.unmodifiableList(array);
 
-        case BEGIN_OBJECT:
-            reader.beginObject();
+        case START_OBJECT:
+            verifyObject(parser);
+
             LinkedHashMap<String, Object> object = new LinkedHashMap<String, Object>();
-            while (reader.peek() == JsonToken.NAME)
-                object.put(reader.nextName(), parseValue(reader));
-            reader.endObject();
+            while (parser.nextToken() != JsonToken.END_OBJECT) {
+                String name = parser.getCurrentName();
+                parser.nextToken();
+                object.put(name, parseValue(parser));
+            }
             return Collections.unmodifiableMap(object);
 
-        case BOOLEAN:
-            return reader.nextBoolean();
+        case VALUE_TRUE:
+            return true;
+        case VALUE_FALSE:
+            return false;
 
-        case NULL:
-            reader.nextNull();
+        case VALUE_NULL:
             return null;
 
-        case NUMBER:
-            try {
-                return reader.nextInt();
-            }
-            catch (NumberFormatException e) {
-                try {
-                    return reader.nextLong();
-                }
-                catch (NumberFormatException e2) {
-                    return reader.nextDouble();
-                }
+        case VALUE_NUMBER_INT:
+        case VALUE_NUMBER_FLOAT:
+            switch (parser.getNumberType()) {
+            case INT:
+                return parser.getIntValue();
+            case LONG:
+                return parser.getLongValue();
+            case FLOAT:
+                return parser.getFloatValue();
+            case DOUBLE:
+                return parser.getDoubleValue();
+            case BIG_DECIMAL:
+                return parser.getDecimalValue();
+            case BIG_INTEGER:
+                return parser.getBigIntegerValue();
             }
 
-        case STRING:
+        case VALUE_STRING:
+            return parser.getText();
+
         default:
-            return reader.nextString();
+            throw new IOException("Unhandled JSON token: " + parser.getCurrentToken());
         }
     }
 
-    private void parseLinks(JsonReader reader, BaseHALResource.Builder builder) throws IOException {
-        reader.beginObject();
-        while (reader.peek() == JsonToken.NAME) {
-            String rel = reader.nextName();
+    private void parseLinks(JsonParser parser, BaseHALResource.Builder builder) throws IOException {
+        verifyObject(parser);
+        while (parser.nextToken() != JsonToken.END_OBJECT) {
+            String rel = parser.getCurrentName();
 
-            if (reader.peek() == JsonToken.BEGIN_ARRAY) {
-                reader.beginArray();
-                while (reader.peek() != JsonToken.END_ARRAY) {
-                    builder.putLink(parseLink(reader, builder.buildLink(rel)));
+            if (parser.nextToken() == JsonToken.START_ARRAY) {
+                while (parser.nextToken() != JsonToken.END_ARRAY) {
+                    builder.putLink(parseLink(parser, builder.buildLink(rel)));
                 }
-                reader.endArray();
             }
             else {
-                builder.putLink(parseLink(reader, builder.buildLink(rel)));
+                builder.putLink(parseLink(parser, builder.buildLink(rel)));
             }
         }
-        reader.endObject();
     }
 
-    private HALLink parseLink(JsonReader reader, BaseHALLink.Builder builder) throws IOException {
-        reader.beginObject();
-        while (reader.peek() == JsonToken.NAME) {
-            builder.putAttribute(reader.nextName(), parseValue(reader));
+    private HALLink parseLink(JsonParser parser, BaseHALLink.Builder builder) throws IOException {
+        verifyObject(parser);
+        while (parser.nextToken() != JsonToken.END_OBJECT) {
+            String name = parser.getCurrentName();
+            parser.nextToken();
+            builder.putAttribute(name, parseValue(parser));
         }
-        reader.endObject();
 
         return builder.build();
     }
 
-    private void parseEmbedded(JsonReader reader, BaseHALResource.Builder builder) throws IOException {
-        reader.beginObject();
-        while (reader.peek() == JsonToken.NAME) {
-            String rel = reader.nextName();
-            if (reader.peek() == JsonToken.BEGIN_ARRAY) {
-                reader.beginArray();
-                while (reader.peek() != JsonToken.END_ARRAY) {
-                    builder.putResource(parseResource(reader, builder.buildResource()), rel);
+    private void parseEmbedded(JsonParser parser, BaseHALResource.Builder builder) throws IOException {
+        verifyObject(parser);
+        while (parser.nextToken() != JsonToken.END_OBJECT) {
+            String rel = parser.getCurrentName();
+            if (parser.nextToken() == JsonToken.START_ARRAY) {
+                while (parser.nextToken() != JsonToken.END_ARRAY) {
+                    builder.putResource(parseResource(parser, builder.buildResource()), rel);
                 }
-                reader.endArray();
             }
             else {
-                builder.putResource(parseResource(reader, builder.buildResource()), rel);
+                builder.putResource(parseResource(parser, builder.buildResource()), rel);
             }
         }
-        reader.endObject();
     }
 
     // *** Parcelable implementation

@@ -22,5 +22,6 @@
         android:name="android.test.InstrumentationTestRunner"
         android:label="Tests for net.xaethos.android.halparser"
         android:targetPackage="net.xaethos.android.halparser.tests" />
+    <uses-sdk android:targetSdkVersion="17" android:minSdkVersion="8"/>
 
 </manifest>
