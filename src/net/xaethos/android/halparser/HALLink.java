@@ -8,10 +8,16 @@ import android.os.Parcelable;
 
 public interface HALLink extends Parcelable
 {
+    public static final String ATTR_REL = "rel";
+    public static final String ATTR_HREF = "href";
+    public static final String ATTR_TITLE = "title";
+    public static final String ATTR_TEMPLATED = "templated";
 
     public URI getBaseURI();
 
     public String getRel();
+
+    public String getTitle();
 
     public String getHref();
 

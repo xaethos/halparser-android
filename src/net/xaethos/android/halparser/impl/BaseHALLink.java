@@ -15,10 +15,6 @@ import com.scurrilous.uritemplate.URITemplate;
 
 public class BaseHALLink implements HALLink
 {
-    public static final String ATTR_REL = "rel";
-    public static final String ATTR_HREF = "href";
-    public static final String ATTR_TEMPLATED = "templated";
-
     private final URI mBaseURI;
     private final String mRel;
     private final String mHref;
@@ -41,6 +37,12 @@ public class BaseHALLink implements HALLink
     @Override
     public String getRel() {
         return mRel;
+    }
+
+    @Override
+    public String getTitle() {
+        Object value = mAttributes.get(ATTR_TITLE);
+        return value == null ? null : value.toString();
     }
 
     @Override
