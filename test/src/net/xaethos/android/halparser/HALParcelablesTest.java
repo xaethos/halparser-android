@@ -68,9 +68,14 @@ public class HALParcelablesTest extends HALParserTestCase
 
     protected <T extends Parcelable> T copyFromParceling(T original) {
         Parcel parcel = Parcel.obtain();
-        parcel.writeParcelable(original, 0);
-        parcel.setDataPosition(0);
-        return parcel.readParcelable(original.getClass().getClassLoader());
+        try {
+            parcel.writeParcelable(original, 0);
+            parcel.setDataPosition(0);
+            return parcel.readParcelable(original.getClass().getClassLoader());
+        }
+        finally {
+            parcel.recycle();
+        }
     }
 
 }

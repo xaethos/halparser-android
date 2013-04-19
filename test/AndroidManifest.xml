@@ -3,14 +3,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.xaethos.android.halparser.tests"
     android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionName="1.0" xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="17" />
 
     <!--
          We add an application tag here just so that we can indicate that
          this package needs to link against the android.test library,
          which is needed when building test cases.
     -->
-    <application>
+    <application android:allowBackup="false">
         <uses-library android:name="android.test.runner" />
     </application>
     <!--
@@ -22,6 +26,5 @@
         android:name="android.test.InstrumentationTestRunner"
         android:label="Tests for net.xaethos.android.halparser"
         android:targetPackage="net.xaethos.android.halparser.tests" />
-    <uses-sdk android:targetSdkVersion="17" android:minSdkVersion="8"/>
 
 </manifest>
