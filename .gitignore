@@ -2,6 +2,10 @@
 .DS_Store
 
 ## Android ignores
+# Gradle
+.gradle/
+build/
+
 # support libs
 **/libs/android-support-v*.jar
 
