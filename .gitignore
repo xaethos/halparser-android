@@ -5,6 +5,7 @@
 # Gradle
 .gradle/
 build/
+gradle-app.setting
 
 # support libs
 **/libs/android-support-v*.jar
