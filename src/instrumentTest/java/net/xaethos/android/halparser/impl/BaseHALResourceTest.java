@@ -22,7 +22,7 @@ public class BaseHALResourceTest extends HALParserTestCase
 
     public void testProperty() {
         resource = builder.putProperty("foo", "bar").build();
-        assertThat((String) resource.getProperty("foo"), is("bar"));
+        assertThat((String) resource.getValue("foo"), is("bar"));
     }
 
     public void testEmptyRels() throws Exception {

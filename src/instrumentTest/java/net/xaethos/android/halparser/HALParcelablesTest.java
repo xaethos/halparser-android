@@ -26,17 +26,17 @@ public class HALParcelablesTest extends HALParserTestCase
         resource = copyFromParceling(newResource(R.raw.example));
 
         assertThat(resource.getBaseURI(), is(exampleURI));
-        Map<String, Object> properties = resource.getProperties();
+        Map<String, ? extends HALProperty> properties = resource.getProperties();
 
         assertThat(properties.keySet(), contains("age", "expired", "id", "name", "optional"));
 
-        assertThat((String) properties.get("name"), is("Example Resource"));
+        assertThat((String) properties.get("name").getValue(), is("Example Resource"));
 
-        assertThat((Integer) properties.get("age"), is(33));
-        assertThat((Integer) properties.get("id"), is(123456));
+        assertThat((Integer) properties.get("age").getValue(), is(33));
+        assertThat((Integer) properties.get("id").getValue(), is(123456));
 
-        assertThat((Boolean) properties.get("expired"), is(false));
-        assertThat((Boolean) properties.get("optional"), is(true));
+        assertThat((Boolean) properties.get("expired").getValue(), is(false));
+        assertThat((Boolean) properties.get("optional").getValue(), is(true));
     }
 
     public void testParcelsLinks() throws Exception {
@@ -61,7 +61,7 @@ public class HALParcelablesTest extends HALParserTestCase
 
         assertThat(subresource, is(notNullValue()));
         assertThat(subresource.getLink("self").getHref(), is("https://example.com/user/11"));
-        assertThat((Integer) subresource.getProperty("age"), is(32));
+        assertThat((Integer) subresource.getValue("age"), is(32));
     }
 
     // *** Helper methods

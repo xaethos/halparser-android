@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import net.xaethos.android.halparser.HALLink;
+import net.xaethos.android.halparser.HALProperty;
 import net.xaethos.android.halparser.HALResource;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -18,7 +19,7 @@ public class BaseHALResource implements HALResource
 {
 
     private final URI mBaseURI;
-    private final LinkedHashMap<String, Object> mProperties = new LinkedHashMap<String, Object>();
+    private final LinkedHashMap<String, Property> mProperties = new LinkedHashMap<String, Property>();
     private final LinkedHashMap<String, ArrayList<HALLink>> mLinks = new LinkedHashMap<String, ArrayList<HALLink>>();
     private final LinkedHashMap<String, ArrayList<HALResource>> mResources = new LinkedHashMap<String, ArrayList<HALResource>>();
 
@@ -32,13 +33,18 @@ public class BaseHALResource implements HALResource
     }
 
     @Override
-    public Object getProperty(String name) {
+    public HALProperty getProperty(String name) {
         return mProperties.get(name);
     }
 
     @Override
-    public Map<String, Object> getProperties() {
+    public Map<String, ? extends HALProperty> getProperties() {
         return Collections.unmodifiableMap(mProperties);
+    }
+
+    @Override
+    public Object getValue(String propertyName) {
+        return mProperties.get(propertyName).getValue();
     }
 
     @Override
@@ -147,6 +153,37 @@ public class BaseHALResource implements HALResource
 
     // ***** Inner classes
 
+    public static class Property implements HALProperty
+    {
+        public final String name;
+        public final Object value;
+
+        public Property(String name, Object value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
+        public Object getValue() {
+            return value;
+        }
+
+        @Override
+        public String getType() {
+            return null;
+        }
+
+        @Override
+        public String getTitle() {
+            return null;
+        }
+    }
+
     public static class Builder
     {
 
@@ -165,7 +202,7 @@ public class BaseHALResource implements HALResource
         }
 
         public Builder putProperty(String name, Object value) {
-            mResource.mProperties.put(name, value);
+            mResource.mProperties.put(name, new Property(name, value));
             return this;
         }
 
