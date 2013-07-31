@@ -1,17 +1,18 @@
 package net.xaethos.android.halparser;
 
+import net.xaethos.android.halparser.serializers.HALJsonSerializer;
+import net.xaethos.android.halparser.tests.R;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import net.xaethos.android.halparser.tests.R;
 
 public class HALJsonExampleParsingTest extends HALParserTestCase
 {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        parser = new HALJsonParser("http://example.com/");
+        parser = new HALJsonSerializer("http://example.com/");
     }
 
     public void testExampleWithoutHref() throws Exception {

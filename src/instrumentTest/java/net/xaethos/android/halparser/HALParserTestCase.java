@@ -1,5 +1,9 @@
 package net.xaethos.android.halparser;
 
+import android.test.AndroidTestCase;
+
+import net.xaethos.android.halparser.serializers.HALJsonSerializer;
+
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
@@ -7,20 +11,19 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 
-import android.test.AndroidTestCase;
-
+@SuppressWarnings("ConstantConditions")
 public class HALParserTestCase extends AndroidTestCase
 {
 
     protected static final URI exampleURI = URI.create("http://example.com/");
 
-    protected HALJsonParser parser;
+    protected HALJsonSerializer parser;
     protected HALResource resource;
 
     // *** Helpers
 
-    protected HALJsonParser getParser() {
-        return parser != null ? parser : (parser = new HALJsonParser(exampleURI));
+    protected HALJsonSerializer getParser() {
+        return parser != null ? parser : (parser = new HALJsonSerializer(exampleURI));
     }
 
     protected Reader newReader(int resId) {

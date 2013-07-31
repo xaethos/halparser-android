@@ -22,6 +22,11 @@
     "ns:query" : {
       "href" : "https://example.com/api/customer/search{?queryParam}",
       "templated" : true
+    },
+    "ns:pet-search" : {
+      "href" : "https://example.com/api/pet/search{?queryParam}",
+      "title" : "Search Pets by Name",
+      "hreflang" : "en"
     }
   }
 }

@@ -1,24 +1,26 @@
 package net.xaethos.android.halparser;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import net.xaethos.android.halparser.serializers.HALJsonSerializer;
+import net.xaethos.android.halparser.tests.R;
+
+import java.util.List;
+import java.util.Map;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-import java.util.List;
-import java.util.Map;
-
-import net.xaethos.android.halparser.tests.R;
-import android.os.Parcel;
-import android.os.Parcelable;
-
 public class HALParcelablesTest extends HALParserTestCase
 {
 
     public void testHALJsonParser() {
         parser = getParser();
-        HALJsonParser copy = copyFromParceling(parser);
+        HALJsonSerializer copy = copyFromParceling(parser);
         assertThat(copy.getBaseURI(), is(exampleURI));
     }
 

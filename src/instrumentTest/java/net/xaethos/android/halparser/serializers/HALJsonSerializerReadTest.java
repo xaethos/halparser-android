@@ -1,9 +1,14 @@
-package net.xaethos.android.halparser;
+package net.xaethos.android.halparser.serializers;
+
+import junit.framework.Assert;
+
+import net.xaethos.android.halparser.HALParserTestCase;
+import net.xaethos.android.halparser.HALResource;
 
 import java.io.StringReader;
 import java.net.URI;
 
-public class HALJsonParserTest extends HALParserTestCase
+public class HALJsonSerializerReadTest extends HALParserTestCase
 {
 
     public void testBaseURI() {
@@ -13,7 +18,7 @@ public class HALJsonParserTest extends HALParserTestCase
     public void testBaseURIMustBeAbsolute() {
         URI relativeURI = URI.create("/index.html");
         try {
-            new HALJsonParser(relativeURI);
+            new HALJsonSerializer(relativeURI);
             fail("Expected IllegalArgumentException");
         }
         catch (IllegalArgumentException e) {
@@ -22,7 +27,7 @@ public class HALJsonParserTest extends HALParserTestCase
     }
 
     public void testStringConstructor() {
-        parser = new HALJsonParser("http://example.com/");
+        parser = new HALJsonSerializer("http://example.com/");
         assertEquals(exampleURI, parser.getBaseURI());
     }
 
@@ -31,7 +36,7 @@ public class HALJsonParserTest extends HALParserTestCase
     }
 
     public void testResourceBaseURI() throws Exception {
-        assertEquals(exampleURI, getResource().getBaseURI());
+        Assert.assertEquals(exampleURI, getResource().getBaseURI());
     }
 
     // *** Helpers

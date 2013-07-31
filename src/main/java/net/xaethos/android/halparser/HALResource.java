@@ -1,11 +1,11 @@
 package net.xaethos.android.halparser;
 
+import android.os.Parcelable;
+
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import android.os.Parcelable;
 
 public interface HALResource extends Parcelable
 {

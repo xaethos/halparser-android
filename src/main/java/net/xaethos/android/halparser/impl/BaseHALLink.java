@@ -1,17 +1,18 @@
 package net.xaethos.android.halparser.impl;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.scurrilous.uritemplate.URITemplate;
+
+import net.xaethos.android.halparser.HALLink;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import net.xaethos.android.halparser.HALLink;
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import com.scurrilous.uritemplate.URITemplate;
 
 public class BaseHALLink implements HALLink
 {
@@ -69,6 +70,11 @@ public class BaseHALLink implements HALLink
     @Override
     public Object getAttribute(String name) {
         return mAttributes.get(name);
+    }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return Collections.unmodifiableMap(mAttributes);
     }
 
     @Override

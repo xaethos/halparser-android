@@ -1,10 +1,10 @@
 package net.xaethos.android.halparser;
 
+import android.os.Parcelable;
+
 import java.net.URI;
 import java.util.Map;
 import java.util.Set;
-
-import android.os.Parcelable;
 
 public interface HALLink extends Parcelable
 {
@@ -28,6 +28,8 @@ public interface HALLink extends Parcelable
     public Set<String> getVariables();
 
     public Object getAttribute(String name);
+
+    public Map<String, Object> getAttributes();
 
     public boolean isTemplated();
 

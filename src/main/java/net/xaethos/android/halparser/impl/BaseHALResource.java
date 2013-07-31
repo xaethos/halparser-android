@@ -1,5 +1,12 @@
 package net.xaethos.android.halparser.impl;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import net.xaethos.android.halparser.HALLink;
+import net.xaethos.android.halparser.HALProperty;
+import net.xaethos.android.halparser.HALResource;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,12 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import net.xaethos.android.halparser.HALLink;
-import net.xaethos.android.halparser.HALProperty;
-import net.xaethos.android.halparser.HALResource;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 public class BaseHALResource implements HALResource
 {
@@ -165,7 +166,7 @@ public class BaseHALResource implements HALResource
 
         @Override
         public String getName() {
-            return null;
+            return name;
         }
 
         @Override
