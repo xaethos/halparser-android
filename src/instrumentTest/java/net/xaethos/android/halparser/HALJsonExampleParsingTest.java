@@ -1,30 +1,31 @@
 package net.xaethos.android.halparser;
 
+import net.xaethos.android.halparser.serializers.HALJsonSerializer;
+import net.xaethos.android.halparser.tests.R;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import net.xaethos.android.halparser.tests.R;
 
 public class HALJsonExampleParsingTest extends HALParserTestCase
 {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        parser = new HALJsonParser("http://example.com/");
+        parser = new HALJsonSerializer("http://example.com/");
     }
 
     public void testExampleWithoutHref() throws Exception {
         resource = newResource(R.raw.example_without_href);
-        assertEquals("Example Resource", resource.getProperty("name"));
+        assertEquals("Example Resource", resource.getValue("name"));
     }
 
     public void testExampleWithArray() throws Exception {
         resource = newResource(R.raw.example_with_array);
-        assertEquals("Example Resource", resource.getProperty("name"));
+        assertEquals("Example Resource", resource.getValue("name"));
 
-        assertTrue(resource.getProperty("array") instanceof List);
-        List<?> list = (List<?>) resource.getProperty("array");
+        assertTrue(resource.getValue("array") instanceof List);
+        List<?> list = (List<?>) resource.getValue("array");
         assertEquals(3, list.size());
         assertEquals("one", list.get(0));
         assertEquals("two", list.get(1));
@@ -36,29 +37,29 @@ public class HALJsonExampleParsingTest extends HALParserTestCase
     public void testExampleWithProperties() throws Exception {
         resource = newResource(R.raw.example);
 
-        assertEquals(33, resource.getProperty("age"));
-        assertEquals(false, resource.getProperty("expired"));
-        assertEquals(123456, resource.getProperty("id"));
-        assertEquals("Example Resource", resource.getProperty("name"));
-        assertEquals(true, resource.getProperty("optional"));
+        assertEquals(33, resource.getValue("age"));
+        assertEquals(false, resource.getValue("expired"));
+        assertEquals(123456, resource.getValue("id"));
+        assertEquals("Example Resource", resource.getValue("name"));
+        assertEquals(true, resource.getValue("optional"));
     }
 
     public void testExampleWithNullProperty() throws Exception {
         resource = newResource(R.raw.example_with_null_property);
-        assertEquals(null, resource.getProperty("nullprop"));
+        assertEquals(null, resource.getValue("nullprop"));
     }
 
     public void testExampleWithNumbers() throws Exception {
         resource = newResource(R.raw.example_with_numbers);
-        assertEquals(42, resource.getProperty("int"));
-        assertEquals(9223372036854775807L, resource.getProperty("long"));
-        assertEquals(1.3, resource.getProperty("double"));
+        assertEquals(42, resource.getValue("int"));
+        assertEquals(9223372036854775807L, resource.getValue("long"));
+        assertEquals(1.3, resource.getValue("double"));
     }
 
     public void testPropertiesMap() throws Exception {
         resource = newResource(R.raw.example);
 
-        Map<String, Object> properties = resource.getProperties();
+        Map<String, ? extends HALProperty> properties = resource.getProperties();
         String[] names = new String[5];
         names = properties.keySet().toArray(names);
         assertEquals(5, names.length);
@@ -128,11 +129,11 @@ public class HALJsonExampleParsingTest extends HALParserTestCase
         assertNotNull(subresource);
         assertTrue(resource.getProperties().isEmpty());
 
-        assertEquals(32, subresource.getProperty("age"));
-        assertEquals(false, subresource.getProperty("expired"));
-        assertEquals(11, subresource.getProperty("id"));
-        assertEquals("Example User", subresource.getProperty("name"));
-        assertEquals(true, subresource.getProperty("optional"));
+        assertEquals(32, subresource.getValue("age"));
+        assertEquals(false, subresource.getValue("expired"));
+        assertEquals(11, subresource.getValue("id"));
+        assertEquals("Example User", subresource.getValue("name"));
+        assertEquals(true, subresource.getValue("optional"));
 
         assertSame(resource.getBaseURI(), subresource.getBaseURI());
     }
@@ -166,7 +167,7 @@ public class HALJsonExampleParsingTest extends HALParserTestCase
 
     public void testNestedSubresources() throws Exception {
         resource = newResource(R.raw.example_with_multiple_nested_subresources);
-        assertEquals("555-666-7890", resource.getResource("ns:user").getResource("phone:cell").getProperty("number"));
+        assertEquals("555-666-7890", resource.getResource("ns:user").getResource("phone:cell").getValue("number"));
     }
 
 }

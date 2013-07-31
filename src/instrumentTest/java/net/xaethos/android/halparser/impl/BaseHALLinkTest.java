@@ -1,16 +1,18 @@
 package net.xaethos.android.halparser.impl;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-
-import java.net.URI;
-import java.util.HashMap;
-
 import net.xaethos.android.halparser.HALLink;
 import net.xaethos.android.halparser.HALParserTestCase;
 import net.xaethos.android.halparser.tests.R;
+
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
 
 public class BaseHALLinkTest extends HALParserTestCase
 {
@@ -51,6 +53,16 @@ public class BaseHALLinkTest extends HALParserTestCase
                                                           .build();
 
         assertThat(link.getVariables(), contains("v", "empty", "who", "q"));
+    }
+
+    public void testGetAttributes() throws Exception {
+        HALLink link = getResourceLink(R.raw.example_with_template, "ns:pet-search");
+
+        Map<String, Object> attrs = link.getAttributes();
+        assertThat(attrs.size(), is(4));
+        assertThat(attrs.keySet(), hasItems("rel", "href", "title", "hreflang"));
+        assertThat(attrs.get("rel").toString(), is("ns:pet-search"));
+        assertThat(link.isTemplated(), is(true));
     }
 
     // *** Helper methods

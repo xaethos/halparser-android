@@ -1,11 +1,12 @@
 package net.xaethos.android.halparser.impl;
 
+import net.xaethos.android.halparser.HALParserTestCase;
+import net.xaethos.android.halparser.HALResource;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import net.xaethos.android.halparser.HALParserTestCase;
-import net.xaethos.android.halparser.HALResource;
 
 public class BaseHALResourceTest extends HALParserTestCase
 {
@@ -22,7 +23,7 @@ public class BaseHALResourceTest extends HALParserTestCase
 
     public void testProperty() {
         resource = builder.putProperty("foo", "bar").build();
-        assertThat((String) resource.getProperty("foo"), is("bar"));
+        assertThat((String) resource.getValue("foo"), is("bar"));
     }
 
     public void testEmptyRels() throws Exception {
