@@ -6,14 +6,17 @@ import android.os.Parcelable;
 import net.xaethos.android.halparser.HALLink;
 import net.xaethos.android.halparser.HALProperty;
 import net.xaethos.android.halparser.HALResource;
+import net.xaethos.android.halparser.serializers.HALJsonSerializer;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 public class BaseHALResource implements HALResource
@@ -97,11 +100,18 @@ public class BaseHALResource implements HALResource
 
     // *** Parcelable implementation
 
+    @SuppressWarnings("UnusedDeclaration")
     public static final Parcelable.Creator<BaseHALResource> CREATOR = new Creator<BaseHALResource>() {
 
         @Override
         public BaseHALResource createFromParcel(Parcel source) {
-            return new BaseHALResource(source);
+            HALJsonSerializer serializer = new HALJsonSerializer(source.readString());
+            StringReader reader = new StringReader(source.readString());
+            try {
+                return (BaseHALResource) serializer.parse(reader);
+            } catch (IOException e) {
+                return null;
+            }
         }
 
         @Override
@@ -110,14 +120,6 @@ public class BaseHALResource implements HALResource
         }
     };
 
-    public BaseHALResource(Parcel in) {
-        this(URI.create(in.readString()));
-        in.readMap(mProperties, null);
-
-        readTypedArrayMap(in, mLinks, BaseHALLink.CREATOR);
-        readTypedArrayMap(in, mResources, BaseHALResource.CREATOR);
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -125,31 +127,14 @@ public class BaseHALResource implements HALResource
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
+        HALJsonSerializer serializer = new HALJsonSerializer(mBaseURI);
         out.writeString(mBaseURI.toString());
-        out.writeMap(mProperties);
-
-        writeTypedArrayMap(out, mLinks);
-        writeTypedArrayMap(out, mResources);
-    }
-
-    private <T extends Parcelable> void readTypedArrayMap(Parcel in,
-            LinkedHashMap<String, ArrayList<T>> map,
-            Parcelable.Creator<? extends T> creator)
-    {
-        int count = in.readInt();
-        while (count-- > 0) {
-            String rel = in.readString();
-            ArrayList<T> list = new ArrayList<T>(in.createTypedArrayList(creator));
-            map.put(rel, list);
+        StringWriter writer = new StringWriter();
+        try {
+            serializer.write(this, writer);
+        } catch (IOException e) {
         }
-    }
-
-    private <T extends Parcelable> void writeTypedArrayMap(Parcel out, LinkedHashMap<String, ArrayList<T>> map) {
-        out.writeInt(map.size());
-        for (Entry<String, ArrayList<T>> entry : map.entrySet()) {
-            out.writeString(entry.getKey());
-            out.writeTypedList(entry.getValue());
-        }
+        out.writeString(writer.toString());
     }
 
     // ***** Inner classes
