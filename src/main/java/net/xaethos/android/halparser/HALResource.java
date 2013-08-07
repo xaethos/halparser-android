@@ -17,8 +17,13 @@ public interface HALResource extends Parcelable
     /* Properties */
 
     public HALProperty getProperty(String name);
+    public void setProperty(HALProperty property);
+    public void removeProperty(String name);
+
     public Map<String, ? extends HALProperty> getProperties();
+
     public Object getValue(String propertyName);
+    public void setValue(String propertyName, Object value);
 
     /* Links */
 

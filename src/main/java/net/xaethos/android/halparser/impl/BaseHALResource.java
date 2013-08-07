@@ -23,11 +23,11 @@ public class BaseHALResource implements HALResource
 {
 
     private final URI mBaseURI;
-    private final LinkedHashMap<String, Property> mProperties = new LinkedHashMap<String, Property>();
+    private final LinkedHashMap<String, HALProperty> mProperties = new LinkedHashMap<String, HALProperty>();
     private final LinkedHashMap<String, ArrayList<HALLink>> mLinks = new LinkedHashMap<String, ArrayList<HALLink>>();
     private final LinkedHashMap<String, ArrayList<HALResource>> mResources = new LinkedHashMap<String, ArrayList<HALResource>>();
 
-    private BaseHALResource(URI baseURI) {
+    public BaseHALResource(URI baseURI) {
         mBaseURI = baseURI;
     }
 
@@ -42,6 +42,16 @@ public class BaseHALResource implements HALResource
     }
 
     @Override
+    public void setProperty(HALProperty property) {
+        mProperties.put(property.getName(), property);
+    }
+
+    @Override
+    public void removeProperty(String name) {
+        mProperties.remove(name);
+    }
+
+    @Override
     public Map<String, ? extends HALProperty> getProperties() {
         return Collections.unmodifiableMap(mProperties);
     }
@@ -49,6 +59,11 @@ public class BaseHALResource implements HALResource
     @Override
     public Object getValue(String propertyName) {
         return mProperties.get(propertyName).getValue();
+    }
+
+    @Override
+    public void setValue(String propertyName, Object value) {
+        setProperty(new Property(propertyName, value));
     }
 
     @Override
