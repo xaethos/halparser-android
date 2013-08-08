@@ -29,6 +29,9 @@ public interface HALResource extends Parcelable
 
     public HALLink getLink(String rel);
     public List<HALLink> getLinks(String rel);
+    public void addLink(HALLink link);
+    public void removeLink(HALLink link);
+
     public Set<String> getLinkRels();
 
     /* Embedded resources */

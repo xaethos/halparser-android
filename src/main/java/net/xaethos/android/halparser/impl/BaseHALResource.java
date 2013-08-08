@@ -77,6 +77,27 @@ public class BaseHALResource implements HALResource
     }
 
     @Override
+    public void addLink(HALLink link) {
+        String rel = link.getRel();
+        ArrayList<HALLink> links = mLinks.get(rel);
+        if (links == null) {
+            links = new ArrayList<HALLink>();
+            mLinks.put(rel, links);
+        }
+        links.add(link);
+    }
+
+    @Override
+    public void removeLink(HALLink link) {
+        String rel = link.getRel();
+        ArrayList<HALLink> links = mLinks.get(rel);
+        if (links == null) return;
+        if (links.remove(link)) {
+            if (links.isEmpty()) mLinks.remove(rel);
+        }
+    }
+
+    @Override
     public Set<String> getLinkRels() {
         return Collections.unmodifiableSet(mLinks.keySet());
     }
