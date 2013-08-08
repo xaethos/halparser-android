@@ -22,19 +22,9 @@ import java.util.Set;
 public class BaseHALResource implements HALResource
 {
 
-    private final URI mBaseURI;
     private final LinkedHashMap<String, HALProperty> mProperties = new LinkedHashMap<String, HALProperty>();
     private final LinkedHashMap<String, ArrayList<HALLink>> mLinks = new LinkedHashMap<String, ArrayList<HALLink>>();
     private final LinkedHashMap<String, ArrayList<HALResource>> mResources = new LinkedHashMap<String, ArrayList<HALResource>>();
-
-    public BaseHALResource(URI baseURI) {
-        mBaseURI = baseURI;
-    }
-
-    @Override
-    public URI getBaseURI() {
-        return mBaseURI;
-    }
 
     @Override
     public HALProperty getProperty(String name) {
@@ -157,7 +147,7 @@ public class BaseHALResource implements HALResource
 
         @Override
         public BaseHALResource createFromParcel(Parcel source) {
-            HALJsonSerializer serializer = new HALJsonSerializer(source.readString());
+            HALJsonSerializer serializer = new HALJsonSerializer();
             StringReader reader = new StringReader(source.readString());
             try {
                 return (BaseHALResource) serializer.parse(reader);
@@ -179,8 +169,7 @@ public class BaseHALResource implements HALResource
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        HALJsonSerializer serializer = new HALJsonSerializer(mBaseURI);
-        out.writeString(mBaseURI.toString());
+        HALJsonSerializer serializer = new HALJsonSerializer();
         StringWriter writer = new StringWriter();
         try {
             serializer.write(this, writer);
@@ -228,9 +217,8 @@ public class BaseHALResource implements HALResource
         private URI mBaseURI;
         private BaseHALResource mResource;
 
-        public Builder(URI baseURI) {
-            mBaseURI = baseURI;
-            mResource = new BaseHALResource(baseURI);
+        public Builder() {
+            mResource = new BaseHALResource();
         }
 
         public HALResource build() {
@@ -259,7 +247,7 @@ public class BaseHALResource implements HALResource
         }
 
         public BaseHALResource.Builder buildResource() {
-            return new BaseHALResource.Builder(mBaseURI);
+            return new BaseHALResource.Builder();
         }
 
         // *** Helpers

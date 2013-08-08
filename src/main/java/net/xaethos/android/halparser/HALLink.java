@@ -8,8 +8,6 @@ import java.util.Set;
 
 public interface HALLink extends Parcelable
 {
-    public static final String ATTR_REL = "rel";
-    public static final String ATTR_HREF = "href";
 
     public String getRel();
     public String getHref();
