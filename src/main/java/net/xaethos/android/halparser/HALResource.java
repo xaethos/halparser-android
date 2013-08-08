@@ -38,6 +38,9 @@ public interface HALResource extends Parcelable
 
     public HALResource getResource(String rel);
     public List<HALResource> getResources(String rel);
+    public void addResource(HALResource resource, String rel);
+    public void removeResource(HALResource resource, String rel);
+
     public Set<String> getResourceRels();
 
 }

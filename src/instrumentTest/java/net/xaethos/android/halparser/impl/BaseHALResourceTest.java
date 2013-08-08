@@ -112,4 +112,34 @@ public class BaseHALResourceTest extends HALParserTestCase
         assertThat(resource.getLinks("item"), hasSize(1));
         assertThat(resource.getLinks("item").get(0).getHref(), is("/item/13"));
     }
+
+    public void testAddResource() {
+        resource = new BaseHALResource(exampleURI);
+
+        resource.addResource(new BaseHALResource(exampleURI), "sibling");
+        resource.addResource(new BaseHALResource(exampleURI), "item");
+        resource.addResource(new BaseHALResource(exampleURI), "item");
+
+        assertThat(resource.getResourceRels(), contains("sibling", "item"));
+        assertThat(resource.getResources("sibling"), hasSize(1));
+        assertThat(resource.getResources("item"), hasSize(2));
+    }
+
+    public void testRemoveResource() {
+        resource = new BaseHALResource(exampleURI);
+        HALResource embedded;
+
+        embedded = new BaseHALResource(exampleURI);
+        resource.addResource(embedded, "sibling");
+        resource.removeResource(embedded, "sibling");
+
+        embedded = new BaseHALResource(exampleURI);
+        resource.addResource(embedded, "item");
+        resource.addResource(new BaseHALResource(exampleURI), "item");
+        resource.removeResource(embedded, "item");
+
+        assertThat(resource.getResourceRels(), contains("item"));
+        assertThat(resource.getResources("item"), hasSize(1));
+    }
+
 }

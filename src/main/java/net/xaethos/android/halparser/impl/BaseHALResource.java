@@ -78,23 +78,12 @@ public class BaseHALResource implements HALResource
 
     @Override
     public void addLink(HALLink link) {
-        String rel = link.getRel();
-        ArrayList<HALLink> links = mLinks.get(rel);
-        if (links == null) {
-            links = new ArrayList<HALLink>();
-            mLinks.put(rel, links);
-        }
-        links.add(link);
+        getOrCreateList(mLinks, link.getRel()).add(link);
     }
 
     @Override
     public void removeLink(HALLink link) {
-        String rel = link.getRel();
-        ArrayList<HALLink> links = mLinks.get(rel);
-        if (links == null) return;
-        if (links.remove(link)) {
-            if (links.isEmpty()) mLinks.remove(rel);
-        }
+        removeItem(mLinks, link.getRel(), link);
     }
 
     @Override
@@ -113,6 +102,16 @@ public class BaseHALResource implements HALResource
     }
 
     @Override
+    public void addResource(HALResource resource, String rel) {
+        getOrCreateList(mResources, rel).add(resource);
+    }
+
+    @Override
+    public void removeResource(HALResource resource, String rel) {
+        removeItem(mResources, rel, resource);
+    }
+
+    @Override
     public Set<String> getResourceRels() {
         return Collections.unmodifiableSet(mResources.keySet());
     }
@@ -123,6 +122,23 @@ public class BaseHALResource implements HALResource
         ArrayList<T> list = map.get(key);
         if (list != null && !list.isEmpty()) return list.get(0);
         return null;
+    }
+
+    private <T> ArrayList<T> getOrCreateList(Map<String, ArrayList<T>> map, String key) {
+        ArrayList<T> list = map.get(key);
+        if (list == null) {
+            list = new ArrayList<T>();
+            map.put(key, list);
+        }
+        return list;
+    }
+
+    private <T> void removeItem(Map<String, ArrayList<T>> map, String key, T item) {
+        ArrayList<T> list = map.get(key);
+        if (list == null) return;
+        if (list.remove(item)) {
+            if (list.isEmpty()) map.remove(key);
+        }
     }
 
     private <T> List<T> getAll(Map<String, ArrayList<T>> map, String key) {
