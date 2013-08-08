@@ -5,23 +5,64 @@ import net.xaethos.android.halparser.HALParserTestCase;
 import net.xaethos.android.halparser.tests.R;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static net.xaethos.android.halparser.matchers.Throws.throwsA;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+
 
 public class BaseHALLinkTest extends HALParserTestCase
 {
 
-    public void testGetURI() {
-        HALLink link = new BaseHALLink.Builder(exampleURI).putAttribute(BaseHALLink.ATTR_REL, "self")
-                                                          .putAttribute(BaseHALLink.ATTR_HREF, "/index.json")
-                                                          .build();
+    public void testConstructors() {
+        HALLink link;
+        final String rel = "foo";
+        final String href = "http://example.com";
+        Map<String, ?> attrs = Collections.singletonMap("title", "Link to Foo");
 
+        link = new BaseHALLink(rel, href);
+        assertThat(link.getRel(), is(rel));
+        assertThat(link.getHref(), is(href));
+        assertThat(link.getAttributes().size(), is(0));
+
+        link = new BaseHALLink(rel, href, attrs);
+        assertThat(link.getRel(), is(rel));
+        assertThat(link.getHref(), is(href));
+        assertThat(link.getAttributes().size(), is(1));
+        assertThat(link.getAttributes().get("title").toString(), is("Link to Foo"));
+
+        assertThat(new Runnable() {
+            @Override
+            public void run() {
+                new BaseHALLink(null, href);
+            }
+        }, throwsA(NullPointerException.class));
+
+        assertThat(new Runnable() {
+            @Override
+            public void run() {
+                new BaseHALLink(rel, null);
+            }
+        }, throwsA(NullPointerException.class));
+
+        assertThat(new Runnable() {
+            @Override
+            public void run() {
+                new BaseHALLink(rel, href, null);
+            }
+        }, not(throwsA(Throwable.class)));
+    }
+
+    public void testGetURI() {
+        HALLink link = new BaseHALLink("self", "/index.json");
         assertThat(link.getURI(), is(equalTo(URI.create("/index.json"))));
     }
 
@@ -48,21 +89,38 @@ public class BaseHALLinkTest extends HALParserTestCase
     }
 
     public void testGetVariables() {
-        HALLink link = new BaseHALLink.Builder(exampleURI).putAttribute(BaseHALLink.ATTR_REL, "foo")
-                                                          .putAttribute(BaseHALLink.ATTR_HREF, "/foo{;v,empty,who}{?q}")
-                                                          .build();
-
+        HALLink link = new BaseHALLink("foo", "/foo{;v,empty,who}{?q}");
         assertThat(link.getVariables(), contains("v", "empty", "who", "q"));
     }
 
     public void testGetAttributes() throws Exception {
         HALLink link = getResourceLink(R.raw.example_with_template, "ns:pet-search");
 
-        Map<String, Object> attrs = link.getAttributes();
-        assertThat(attrs.size(), is(4));
-        assertThat(attrs.keySet(), hasItems("rel", "href", "title", "hreflang"));
-        assertThat(attrs.get("rel").toString(), is("ns:pet-search"));
+        Map<String, ?> attrs = link.getAttributes();
+        assertThat(attrs.size(), is(2));
+        assertThat(attrs.keySet(), hasItems("title", "hreflang"));
+        assertThat(attrs.get("title").toString(), is("Search Pets by Name"));
         assertThat(link.isTemplated(), is(true));
+    }
+
+    public void testSetAttribute() throws Exception {
+        HALLink link = new BaseHALLink("foo", "/foo");
+        link.setAttribute("title", "Footurama");
+
+        assertThat((String) link.getAttribute("title"), is("Footurama"));
+
+        Map<String, ?> attrs = link.getAttributes();
+        assertThat(attrs.size(), is(1));
+        assertThat(attrs.keySet(), hasItems("title"));
+    }
+
+    public void testRemoveAttribute() throws Exception {
+        HALLink link = new BaseHALLink("foo", "/foo");
+        link.setAttribute("title", "Footurama");
+        link.removeAttribute("title");
+
+        assertThat(link.getAttribute("title"), is(nullValue()));
+        assertThat(link.getAttributes().size(), is(0));
     }
 
     // *** Helper methods

@@ -78,7 +78,6 @@ public class HALJsonExampleParsingTest extends HALParserTestCase
         link = resource.getLink("self");
         assertNotNull(link);
         assertEquals("self", link.getRel());
-        assertEquals(exampleURI, link.getBaseURI());
         assertEquals("https://example.com/api/customer/123456", link.getHref());
     }
 
@@ -116,7 +115,7 @@ public class HALJsonExampleParsingTest extends HALParserTestCase
         resource = newResource(R.raw.example);
         HALLink link = resource.getLink("ns:parent");
 
-        assertEquals("https://example.com/api/customer/1234", link.getAttribute("href"));
+        assertEquals(null, link.getAttribute("href"));
         assertEquals("bob", link.getAttribute("name"));
         assertEquals("The Parent", link.getAttribute("title"));
         assertEquals("en", link.getAttribute("hreflang"));

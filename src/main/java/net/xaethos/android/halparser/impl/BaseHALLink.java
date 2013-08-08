@@ -16,23 +16,28 @@ import java.util.Set;
 
 public class BaseHALLink implements HALLink
 {
-    private final URI mBaseURI;
     private final String mRel;
     private final String mHref;
     private final HashMap<String, Object> mAttributes;
     private final URITemplate mTemplate;
 
-    private BaseHALLink(URI baseURI, HashMap<String, Object> attributes) {
-        mBaseURI = baseURI;
-        mRel = attributes.get(ATTR_REL).toString();
-        mHref = attributes.get(ATTR_HREF).toString();
-        mAttributes = attributes;
-        mTemplate = new URITemplate(mHref);
+    public BaseHALLink(String rel, String href) {
+        this(rel, href, null);
     }
 
-    @Override
-    public URI getBaseURI() {
-        return mBaseURI;
+    public BaseHALLink(String rel, String href, Map<String, ?> attributes) {
+        if (rel == null) throw new NullPointerException();
+
+        mRel = rel;
+        mHref = href;
+        mTemplate = new URITemplate(mHref);
+
+        if (attributes == null) {
+            mAttributes = new HashMap<String, Object>();
+        }
+        else {
+            mAttributes = new HashMap<String, Object>(attributes);
+        }
     }
 
     @Override
@@ -41,14 +46,28 @@ public class BaseHALLink implements HALLink
     }
 
     @Override
-    public String getTitle() {
-        Object value = mAttributes.get(ATTR_TITLE);
-        return value == null ? null : value.toString();
+    public String getHref() {
+        return mHref;
     }
 
     @Override
-    public String getHref() {
-        return mHref;
+    public Object getAttribute(String name) {
+        return mAttributes.get(name);
+    }
+
+    @Override
+    public void setAttribute(String name, Object value) {
+        mAttributes.put(name, value);
+    }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return Collections.unmodifiableMap(mAttributes);
+    }
+
+    @Override
+    public void removeAttribute(String name) {
+        mAttributes.remove(name);
     }
 
     @Override
@@ -65,16 +84,6 @@ public class BaseHALLink implements HALLink
         catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public Object getAttribute(String name) {
-        return mAttributes.get(name);
-    }
-
-    @Override
-    public Map<String, Object> getAttributes() {
-        return Collections.unmodifiableMap(mAttributes);
     }
 
     @Override
@@ -103,12 +112,10 @@ public class BaseHALLink implements HALLink
     };
 
     public BaseHALLink(Parcel in) {
-        mBaseURI = URI.create(in.readString());
-
+        mRel = in.readString();
+        mHref = in.readString();
         HashMap<String, Object> attributes = new HashMap<String, Object>();
         in.readMap(attributes, null);
-        mRel = attributes.get(ATTR_REL).toString();
-        mHref = attributes.get(ATTR_HREF).toString();
         mAttributes = attributes;
         mTemplate = new URITemplate(mHref);
     }
@@ -120,30 +127,9 @@ public class BaseHALLink implements HALLink
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(mBaseURI.toString());
+        out.writeString(mRel);
+        out.writeString(mHref);
         out.writeMap(mAttributes);
-    }
-
-    // ***** Inner classes
-
-    public static class Builder
-    {
-        private final URI mBaseURI;
-        private final HashMap<String, Object> mAttrs = new HashMap<String, Object>();
-
-        public Builder(URI baseURI) {
-            mBaseURI = baseURI;
-        }
-
-        public HALLink build() {
-            return new BaseHALLink(mBaseURI, mAttrs);
-        }
-
-        public Builder putAttribute(String name, Object value) {
-            mAttrs.put(name, value);
-            return this;
-        }
-
     }
 
 }

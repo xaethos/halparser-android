@@ -208,20 +208,12 @@ public class BaseHALResource implements HALResource
         }
 
         public Builder putLink(HALLink link) {
-            return putLink(link, link.getRel());
-        }
-
-        public Builder putLink(HALLink link, String rel) {
             addContent(mResource.mLinks, link.getRel(), link);
             return this;
         }
 
-        public BaseHALLink.Builder buildLink() {
-            return new BaseHALLink.Builder(mBaseURI);
-        }
-
-        public BaseHALLink.Builder buildLink(String rel) {
-            return buildLink().putAttribute(BaseHALLink.ATTR_REL, rel);
+        public BaseHALLink buildLink(String rel) {
+            return new BaseHALLink(rel, null);
         }
 
         public Builder putResource(HALResource resource, String rel) {

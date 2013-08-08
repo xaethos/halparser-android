@@ -20,6 +20,7 @@ import java.io.Writer;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,9 @@ import java.util.Set;
 
 public class HALJsonSerializer implements Parcelable
 {
+    private static final String HREF = "href";
+    private static final String TEMPLATED = "templated";
+
     private static final String LINKS = "_links";
     private static final String EMBEDDED = "_embedded";
 
@@ -150,24 +154,28 @@ public class HALJsonSerializer implements Parcelable
 
             if (parser.nextToken() == JsonToken.START_ARRAY) {
                 while (parser.nextToken() != JsonToken.END_ARRAY) {
-                    builder.putLink(parseLink(parser, builder.buildLink(rel)));
+                    builder.putLink(parseLink(parser, rel));
                 }
             }
             else {
-                builder.putLink(parseLink(parser, builder.buildLink(rel)));
+                builder.putLink(parseLink(parser, rel));
             }
         }
     }
 
-    private HALLink parseLink(JsonParser parser, BaseHALLink.Builder builder) throws IOException {
+    private HALLink parseLink(JsonParser parser, String rel) throws IOException {
         verifyObject(parser);
+        String href = null;
+        HashMap<String, Object> attributes = new HashMap<String, Object>();
+
         while (parser.nextToken() != JsonToken.END_OBJECT) {
             String name = parser.getCurrentName();
             parser.nextToken();
-            builder.putAttribute(name, parseValue(parser));
+            if (HREF.equals(name)) href = parser.getText();
+            else attributes.put(name, parseValue(parser));
         }
 
-        return builder.build();
+        return new BaseHALLink(rel, href, attributes);
     }
 
     private void parseEmbedded(JsonParser parser, BaseHALResource.Builder builder) throws IOException {
@@ -243,16 +251,15 @@ public class HALJsonSerializer implements Parcelable
 
     private void writeLinkObject(JsonGenerator jsonGenerator, HALLink link) throws IOException {
         jsonGenerator.writeStartObject();
-        for (Map.Entry<String, Object> entry : link.getAttributes().entrySet()) {
+        jsonGenerator.writeObjectField(HREF, link.getHref());
+
+        for (Map.Entry<String, ?> entry : link.getAttributes().entrySet()) {
             String name = entry.getKey();
-            if (HALLink.ATTR_REL.equals(name)) continue;
-            if (HALLink.ATTR_TEMPLATED.equals(name)) {
-                jsonGenerator.writeObjectField(HALLink.ATTR_TEMPLATED, link.isTemplated());
-            }
-            else {
-                jsonGenerator.writeObjectField(name, entry.getValue());
-            }
+            if (TEMPLATED.equals(name)) continue;
+            jsonGenerator.writeObjectField(name, entry.getValue());
         }
+
+        if (link.isTemplated()) jsonGenerator.writeObjectField(TEMPLATED, true);
 
         jsonGenerator.writeEndObject();
     }

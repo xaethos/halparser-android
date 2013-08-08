@@ -10,26 +10,20 @@ public interface HALLink extends Parcelable
 {
     public static final String ATTR_REL = "rel";
     public static final String ATTR_HREF = "href";
-    public static final String ATTR_TITLE = "title";
-    public static final String ATTR_TEMPLATED = "templated";
-
-    public URI getBaseURI();
 
     public String getRel();
-
-    public String getTitle();
-
     public String getHref();
 
-    public URI getURI();
+    public Object getAttribute(String name);
+    public void setAttribute(String name, Object value);
+    public void removeAttribute(String name);
 
+    public Map<String, ?> getAttributes();
+
+    public URI getURI();
     public URI getURI(Map<String, Object> map);
 
     public Set<String> getVariables();
-
-    public Object getAttribute(String name);
-
-    public Map<String, Object> getAttributes();
 
     public boolean isTemplated();
 

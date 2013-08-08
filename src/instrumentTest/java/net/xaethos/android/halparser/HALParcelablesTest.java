@@ -3,6 +3,7 @@ package net.xaethos.android.halparser;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import net.xaethos.android.halparser.impl.BaseHALLink;
 import net.xaethos.android.halparser.serializers.HALJsonSerializer;
 import net.xaethos.android.halparser.tests.R;
 
@@ -11,6 +12,7 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -18,10 +20,21 @@ import static org.hamcrest.Matchers.notNullValue;
 public class HALParcelablesTest extends HALParserTestCase
 {
 
-    public void testHALJsonParser() {
+    public void testHALJsonSerializer() {
         parser = getParser();
         HALJsonSerializer copy = copyFromParceling(parser);
         assertThat(copy.getBaseURI(), is(exampleURI));
+    }
+
+    public void testBaseHALLink() {
+        BaseHALLink link = new BaseHALLink("foo", "/foo");
+        link.setAttribute("title", "Foolicious");
+
+        BaseHALLink copy = copyFromParceling(link);
+
+        assertThat(link.getRel(), is(copy.getRel()));
+        assertThat(link.getHref(), is(equalTo(copy.getHref())));
+        assertThat(link.getAttributes(), is(equalTo(copy.getAttributes())));
     }
 
     public void testParcelsProperties() throws Exception {
