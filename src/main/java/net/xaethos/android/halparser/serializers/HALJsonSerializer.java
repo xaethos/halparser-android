@@ -1,8 +1,5 @@
 package net.xaethos.android.halparser.serializers;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -17,41 +14,32 @@ import net.xaethos.android.halparser.impl.BaseHALResource;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class HALJsonSerializer implements Parcelable
+public class HALJsonSerializer
 {
+    private static final String HREF = "href";
+    private static final String TEMPLATED = "templated";
+
     private static final String LINKS = "_links";
     private static final String EMBEDDED = "_embedded";
 
-    private final URI mURI;
     private final JsonFactory mJsonFactory;
 
-    public HALJsonSerializer(URI baseURI) {
+    public HALJsonSerializer() {
         mJsonFactory = new JsonFactory();
-
-        if (!baseURI.isAbsolute()) throw new IllegalArgumentException("Base URI must be absolute");
-        mURI = baseURI;
-    }
-
-    public HALJsonSerializer(String baseURI) {
-        this(URI.create(baseURI));
-    }
-
-    public URI getBaseURI() {
-        return mURI;
     }
 
     public HALResource parse(Reader reader) throws IOException {
         JsonParser jsonParser = mJsonFactory.createParser(reader);
         jsonParser.nextToken();
-        HALResource resource = parseResource(jsonParser, new BaseHALResource.Builder(mURI));
+        HALResource resource = parseResource(jsonParser);
         jsonParser.close();
 
         return resource;
@@ -71,23 +59,24 @@ public class HALJsonSerializer implements Parcelable
         }
     }
 
-    private HALResource parseResource(JsonParser parser, BaseHALResource.Builder builder) throws IOException {
+    private HALResource parseResource(JsonParser parser) throws IOException {
+        BaseHALResource resource = new BaseHALResource();
         verifyObject(parser);
         while (parser.nextToken() != JsonToken.END_OBJECT) {
             String name = parser.getCurrentName();
             parser.nextToken();
             if (LINKS.equals(name)) {
-                parseLinks(parser, builder);
+                parseLinks(parser, resource);
             }
             else if (EMBEDDED.equals(name)) {
-                parseEmbedded(parser, builder);
+                parseEmbedded(parser, resource);
             }
             else {
-                builder.putProperty(name, parseValue(parser));
+                resource.setValue(name, parseValue(parser));
             }
         }
 
-        return builder.build();
+        return resource;
     }
 
     private Object parseValue(JsonParser parser) throws IOException {
@@ -143,44 +132,48 @@ public class HALJsonSerializer implements Parcelable
         }
     }
 
-    private void parseLinks(JsonParser parser, BaseHALResource.Builder builder) throws IOException {
+    private void parseLinks(JsonParser parser, BaseHALResource resource) throws IOException {
         verifyObject(parser);
         while (parser.nextToken() != JsonToken.END_OBJECT) {
             String rel = parser.getCurrentName();
 
             if (parser.nextToken() == JsonToken.START_ARRAY) {
                 while (parser.nextToken() != JsonToken.END_ARRAY) {
-                    builder.putLink(parseLink(parser, builder.buildLink(rel)));
+                    resource.addLink(parseLink(parser, rel));
                 }
             }
             else {
-                builder.putLink(parseLink(parser, builder.buildLink(rel)));
+                resource.addLink(parseLink(parser, rel));
             }
         }
     }
 
-    private HALLink parseLink(JsonParser parser, BaseHALLink.Builder builder) throws IOException {
+    private HALLink parseLink(JsonParser parser, String rel) throws IOException {
         verifyObject(parser);
+        String href = null;
+        HashMap<String, Object> attributes = new HashMap<String, Object>();
+
         while (parser.nextToken() != JsonToken.END_OBJECT) {
             String name = parser.getCurrentName();
             parser.nextToken();
-            builder.putAttribute(name, parseValue(parser));
+            if (HREF.equals(name)) href = parser.getText();
+            else attributes.put(name, parseValue(parser));
         }
 
-        return builder.build();
+        return new BaseHALLink(rel, href, attributes);
     }
 
-    private void parseEmbedded(JsonParser parser, BaseHALResource.Builder builder) throws IOException {
+    private void parseEmbedded(JsonParser parser, BaseHALResource resource) throws IOException {
         verifyObject(parser);
         while (parser.nextToken() != JsonToken.END_OBJECT) {
             String rel = parser.getCurrentName();
             if (parser.nextToken() == JsonToken.START_ARRAY) {
                 while (parser.nextToken() != JsonToken.END_ARRAY) {
-                    builder.putResource(parseResource(parser, builder.buildResource()), rel);
+                    resource.addResource(parseResource(parser), rel);
                 }
             }
             else {
-                builder.putResource(parseResource(parser, builder.buildResource()), rel);
+                resource.addResource(parseResource(parser), rel);
             }
         }
     }
@@ -243,48 +236,17 @@ public class HALJsonSerializer implements Parcelable
 
     private void writeLinkObject(JsonGenerator jsonGenerator, HALLink link) throws IOException {
         jsonGenerator.writeStartObject();
-        for (Map.Entry<String, Object> entry : link.getAttributes().entrySet()) {
+        jsonGenerator.writeObjectField(HREF, link.getHref());
+
+        for (Map.Entry<String, ?> entry : link.getAttributes().entrySet()) {
             String name = entry.getKey();
-            if (HALLink.ATTR_REL.equals(name)) continue;
-            if (HALLink.ATTR_TEMPLATED.equals(name)) {
-                jsonGenerator.writeObjectField(HALLink.ATTR_TEMPLATED, link.isTemplated());
-            }
-            else {
-                jsonGenerator.writeObjectField(name, entry.getValue());
-            }
+            if (TEMPLATED.equals(name)) continue;
+            jsonGenerator.writeObjectField(name, entry.getValue());
         }
+
+        if (link.isTemplated()) jsonGenerator.writeObjectField(TEMPLATED, true);
 
         jsonGenerator.writeEndObject();
-    }
-
-    // *** Parcelable implementation
-
-    @SuppressWarnings("UnusedDeclaration")
-    public static final Parcelable.Creator<HALJsonSerializer> CREATOR = new Parcelable.Creator<HALJsonSerializer>() {
-        @Override
-        public HALJsonSerializer createFromParcel(Parcel source) {
-            return new HALJsonSerializer(source);
-        }
-
-        @Override
-        public HALJsonSerializer[] newArray(int size) {
-            return new HALJsonSerializer[size];
-        }
-
-    };
-
-    public HALJsonSerializer(Parcel in) {
-        this(in.readString());
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mURI.toString());
     }
 
 }
