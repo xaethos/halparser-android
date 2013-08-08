@@ -39,7 +39,7 @@ public class HALJsonSerializer
     public HALResource parse(Reader reader) throws IOException {
         JsonParser jsonParser = mJsonFactory.createParser(reader);
         jsonParser.nextToken();
-        HALResource resource = parseResource(jsonParser, new BaseHALResource.Builder());
+        HALResource resource = parseResource(jsonParser);
         jsonParser.close();
 
         return resource;
@@ -59,23 +59,24 @@ public class HALJsonSerializer
         }
     }
 
-    private HALResource parseResource(JsonParser parser, BaseHALResource.Builder builder) throws IOException {
+    private HALResource parseResource(JsonParser parser) throws IOException {
+        BaseHALResource resource = new BaseHALResource();
         verifyObject(parser);
         while (parser.nextToken() != JsonToken.END_OBJECT) {
             String name = parser.getCurrentName();
             parser.nextToken();
             if (LINKS.equals(name)) {
-                parseLinks(parser, builder);
+                parseLinks(parser, resource);
             }
             else if (EMBEDDED.equals(name)) {
-                parseEmbedded(parser, builder);
+                parseEmbedded(parser, resource);
             }
             else {
-                builder.putProperty(name, parseValue(parser));
+                resource.setValue(name, parseValue(parser));
             }
         }
 
-        return builder.build();
+        return resource;
     }
 
     private Object parseValue(JsonParser parser) throws IOException {
@@ -131,18 +132,18 @@ public class HALJsonSerializer
         }
     }
 
-    private void parseLinks(JsonParser parser, BaseHALResource.Builder builder) throws IOException {
+    private void parseLinks(JsonParser parser, BaseHALResource resource) throws IOException {
         verifyObject(parser);
         while (parser.nextToken() != JsonToken.END_OBJECT) {
             String rel = parser.getCurrentName();
 
             if (parser.nextToken() == JsonToken.START_ARRAY) {
                 while (parser.nextToken() != JsonToken.END_ARRAY) {
-                    builder.putLink(parseLink(parser, rel));
+                    resource.addLink(parseLink(parser, rel));
                 }
             }
             else {
-                builder.putLink(parseLink(parser, rel));
+                resource.addLink(parseLink(parser, rel));
             }
         }
     }
@@ -162,17 +163,17 @@ public class HALJsonSerializer
         return new BaseHALLink(rel, href, attributes);
     }
 
-    private void parseEmbedded(JsonParser parser, BaseHALResource.Builder builder) throws IOException {
+    private void parseEmbedded(JsonParser parser, BaseHALResource resource) throws IOException {
         verifyObject(parser);
         while (parser.nextToken() != JsonToken.END_OBJECT) {
             String rel = parser.getCurrentName();
             if (parser.nextToken() == JsonToken.START_ARRAY) {
                 while (parser.nextToken() != JsonToken.END_ARRAY) {
-                    builder.putResource(parseResource(parser, builder.buildResource()), rel);
+                    resource.addResource(parseResource(parser), rel);
                 }
             }
             else {
-                builder.putResource(parseResource(parser, builder.buildResource()), rel);
+                resource.addResource(parseResource(parser), rel);
             }
         }
     }

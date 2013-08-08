@@ -11,7 +11,6 @@ import net.xaethos.android.halparser.serializers.HALJsonSerializer;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -209,59 +208,6 @@ public class BaseHALResource implements HALResource
         public String getTitle() {
             return null;
         }
-    }
-
-    public static class Builder
-    {
-
-        private URI mBaseURI;
-        private BaseHALResource mResource;
-
-        public Builder() {
-            mResource = new BaseHALResource();
-        }
-
-        public HALResource build() {
-            HALResource result = mResource;
-            mResource = null;
-            return result;
-        }
-
-        public Builder putProperty(String name, Object value) {
-            mResource.mProperties.put(name, new Property(name, value));
-            return this;
-        }
-
-        public Builder putLink(HALLink link) {
-            addContent(mResource.mLinks, link.getRel(), link);
-            return this;
-        }
-
-        public BaseHALLink buildLink(String rel) {
-            return new BaseHALLink(rel, null);
-        }
-
-        public Builder putResource(HALResource resource, String rel) {
-            addContent(mResource.mResources, rel, resource);
-            return this;
-        }
-
-        public BaseHALResource.Builder buildResource() {
-            return new BaseHALResource.Builder();
-        }
-
-        // *** Helpers
-
-        private <T> void addContent(LinkedHashMap<String, ArrayList<T>> map, String rel, T content) {
-            ArrayList<T> list = map.get(rel);
-            if (list == null) {
-                list = new ArrayList<T>();
-                map.put(rel, list);
-            }
-
-            list.add(content);
-        }
-
     }
 
 }

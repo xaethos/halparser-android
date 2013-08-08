@@ -16,24 +16,15 @@ import static org.hamcrest.Matchers.sameInstance;
 public class BaseHALResourceTest extends HALParserTestCase
 {
 
-    BaseHALResource.Builder builder;
     HALResource resource;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-
-        builder = new BaseHALResource.Builder();
-    }
-
-    public void testProperty() {
-        resource = builder.putProperty("foo", "bar").build();
-        assertThat((String) resource.getValue("foo"), is("bar"));
+        resource = new BaseHALResource();
     }
 
     public void testEmptyRels() throws Exception {
-        resource = newResource("{}");
-
         assertThat(resource.getLink("foo"), is(nullValue()));
         assertThat(resource.getLinks("foo"), is(empty()));
         assertThat(resource.getLinkRels(), is(empty()));
@@ -51,14 +42,12 @@ public class BaseHALResourceTest extends HALParserTestCase
             @Override public String getTitle() { return null; }
         };
 
-        resource = new BaseHALResource();
         resource.setProperty(property);
 
         assertThat(resource.getProperty("foo"), is(sameInstance(property)));
     }
 
     public void testRemoveProperty() {
-        resource = new BaseHALResource();
         resource.setValue("foo", 13);
         resource.removeProperty("foo");
 
@@ -68,15 +57,12 @@ public class BaseHALResourceTest extends HALParserTestCase
     public void testSetValue() {
         Object value = new Object();
 
-        resource = new BaseHALResource();
         resource.setValue("foo", value);
 
         assertThat(resource.getProperty("foo").getValue(), is(sameInstance(value)));
     }
 
     public void testAddLink() {
-        resource = new BaseHALResource();
-
         resource.addLink(new BaseHALLink("sibling", "/bundle/4"));
         resource.addLink(new BaseHALLink("item", "/item/2"));
         resource.addLink(new BaseHALLink("item", "/item/13"));
@@ -92,7 +78,6 @@ public class BaseHALResourceTest extends HALParserTestCase
     }
 
     public void testRemoveLink() {
-        resource = new BaseHALResource();
         HALLink link;
 
         link = new BaseHALLink("sibling", "/bundle/4");
@@ -114,8 +99,6 @@ public class BaseHALResourceTest extends HALParserTestCase
     }
 
     public void testAddResource() {
-        resource = new BaseHALResource();
-
         resource.addResource(new BaseHALResource(), "sibling");
         resource.addResource(new BaseHALResource(), "item");
         resource.addResource(new BaseHALResource(), "item");
@@ -126,7 +109,6 @@ public class BaseHALResourceTest extends HALParserTestCase
     }
 
     public void testRemoveResource() {
-        resource = new BaseHALResource();
         HALResource embedded;
 
         embedded = new BaseHALResource();
