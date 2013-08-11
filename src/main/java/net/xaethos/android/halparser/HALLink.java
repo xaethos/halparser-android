@@ -23,6 +23,7 @@ public interface HALLink extends Parcelable
 
     public Set<String> getVariables();
 
+    public String getTitle();
     public boolean isTemplated();
 
 }

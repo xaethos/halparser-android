@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Collections.singletonMap;
 import static net.xaethos.android.halparser.matchers.Throws.throwsA;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -26,7 +27,7 @@ public class BaseHALLinkTest extends HALParserTestCase
         HALLink link;
         final String rel = "foo";
         final String href = "http://example.com";
-        Map<String, ?> attrs = Collections.singletonMap("title", "Link to Foo");
+        Map<String, ?> attrs = singletonMap("title", "Link to Foo");
 
         link = new BaseHALLink(rel, href);
         assertThat(link.getRel(), is(rel));
@@ -121,6 +122,19 @@ public class BaseHALLinkTest extends HALParserTestCase
 
         assertThat(link.getAttribute("title"), is(nullValue()));
         assertThat(link.getAttributes().size(), is(0));
+    }
+
+    public void testGetTitle() throws Exception {
+        HALLink link;
+
+        link = new BaseHALLink("foo", "/foo");
+        assertThat(link.getTitle(), is(nullValue()));
+
+        link = new BaseHALLink("foo", "/foo", singletonMap("title", "Foontastic"));
+        assertThat(link.getTitle(), is("Foontastic"));
+
+        link = new BaseHALLink("foo", "/foo", singletonMap("title", 42));
+        assertThat(link.getTitle(), is("42"));
     }
 
     // *** Helper methods

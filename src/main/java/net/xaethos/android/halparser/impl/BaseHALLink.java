@@ -16,6 +16,8 @@ import java.util.Set;
 
 public class BaseHALLink implements HALLink
 {
+    private static final String ATTR_TITLE = "title";
+
     private final String mRel;
     private final String mHref;
     private final HashMap<String, Object> mAttributes;
@@ -92,12 +94,19 @@ public class BaseHALLink implements HALLink
     }
 
     @Override
+    public String getTitle() {
+        Object val = mAttributes.get(ATTR_TITLE);
+        return val == null ? null : val.toString();
+    }
+
+    @Override
     public boolean isTemplated() {
         return !mTemplate.getVariableNames().isEmpty();
     }
 
     // *** Parcelable implementation
 
+    @SuppressWarnings("UnusedDeclaration")
     public static final Parcelable.Creator<BaseHALLink> CREATOR = new Creator<BaseHALLink>() {
         @Override
         public BaseHALLink createFromParcel(Parcel source) {
