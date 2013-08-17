@@ -5,10 +5,10 @@ import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
-public class Throws extends TypeSafeDiagnosingMatcher<Runnable> {
+public class ThrowsMatcher extends TypeSafeDiagnosingMatcher<Runnable> {
     private final Class<? extends Throwable> mKlass;
 
-    public Throws(Class<? extends Throwable> klass) {
+    public ThrowsMatcher(Class<? extends Throwable> klass) {
         mKlass = klass;
     }
 
@@ -32,7 +32,7 @@ public class Throws extends TypeSafeDiagnosingMatcher<Runnable> {
 
     @Factory
     public static <T> Matcher<Runnable> throwsA(Class<? extends Throwable> klass) {
-        return new Throws(klass);
+        return new ThrowsMatcher(klass);
     }
 
 }

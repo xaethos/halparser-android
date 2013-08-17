@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
-import static net.xaethos.android.halparser.matchers.Throws.throwsA;
+import static net.xaethos.android.halparser.matchers.ThrowsMatcher.throwsA;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
