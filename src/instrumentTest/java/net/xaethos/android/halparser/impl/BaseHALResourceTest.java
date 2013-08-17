@@ -10,6 +10,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 
@@ -59,7 +60,17 @@ public class BaseHALResourceTest extends HALParserTestCase
 
         resource.setValue("foo", value);
 
+        assertThat(resource.getProperty("foo"), is(not(nullValue())));
         assertThat(resource.getProperty("foo").getValue(), is(sameInstance(value)));
+    }
+
+    public void testGetValue() {
+        Object value = new Object();
+
+        resource.setValue("foo", value);
+
+        assertThat(resource.getValue("foo"), is(sameInstance(value)));
+        assertThat(resource.getValue("bar"), is(nullValue()));
     }
 
     public void testAddLink() {
