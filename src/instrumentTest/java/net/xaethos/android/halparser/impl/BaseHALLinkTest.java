@@ -5,7 +5,6 @@ import net.xaethos.android.halparser.HALParserTestCase;
 import net.xaethos.android.halparser.tests.R;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 

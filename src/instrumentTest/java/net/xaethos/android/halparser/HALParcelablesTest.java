@@ -6,13 +6,11 @@ import android.os.Parcelable;
 import net.xaethos.android.halparser.impl.BaseHALLink;
 import net.xaethos.android.halparser.tests.R;
 
-import java.util.List;
-import java.util.Map;
-
+import static net.xaethos.android.halparser.matchers.HALLinkMatcher.halLinkTo;
+import static net.xaethos.android.halparser.matchers.HALPropertyMatcher.halProperty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -33,33 +31,23 @@ public class HALParcelablesTest extends HALParserTestCase
     public void testParcelsProperties() throws Exception {
         resource = copyFromParceling(newResource(R.raw.example));
 
-        Map<String, ? extends HALProperty> properties = resource.getProperties();
-
-        assertThat(properties.keySet(), contains("age", "expired", "id", "name", "optional"));
-
-        assertThat((String) properties.get("name").getValue(), is("Example Resource"));
-
-        assertThat((Integer) properties.get("age").getValue(), is(33));
-        assertThat((Integer) properties.get("id").getValue(), is(123456));
-
-        assertThat((Boolean) properties.get("expired").getValue(), is(false));
-        assertThat((Boolean) properties.get("optional").getValue(), is(true));
+        assertThat(resource.getProperties(), contains(
+                halProperty("age", 33),
+                halProperty("expired", false),
+                halProperty("id", 123456),
+                halProperty("name", "Example Resource"),
+                halProperty("optional", true)
+        ));
     }
 
     public void testParcelsLinks() throws Exception {
         resource = copyFromParceling(newResource(R.raw.example));
 
-        List<HALLink> links;
-        links = resource.getLinks("curie");
-        assertThat(links, is(notNullValue()));
-        assertThat(links, hasSize(2));
-        assertThat(links.get(0).getHref(), is("https://example.com/apidocs/accounts"));
-        assertThat(links.get(1).getHref(), is("https://example.com/apidocs/roles"));
-
-        assertUnmodifiable(links);
-
         assertThat(resource.getLinkRels(), contains("curie", "self", "ns:parent", "ns:users"));
-        assertEquals("https://example.com/apidocs/accounts", resource.getLink("curie").getHref());
+        assertThat(resource.getLinks("curie"), contains(
+                halLinkTo("https://example.com/apidocs/accounts"),
+                halLinkTo("https://example.com/apidocs/roles")
+        ));
     }
 
     public void testParcelsSubresources() throws Exception {

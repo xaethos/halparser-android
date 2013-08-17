@@ -15,10 +15,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -183,7 +183,7 @@ public class HALJsonSerializer
     private void writeResource(JsonGenerator jsonGenerator, HALResource resource) throws IOException {
         jsonGenerator.writeStartObject();
         writeLinks(jsonGenerator, resource);
-        for (HALProperty prop : resource.getProperties().values()) {
+        for (HALProperty prop : resource.getProperties()) {
             jsonGenerator.writeObjectField(prop.getName(), prop.getValue());
         }
         writeEmbedded(jsonGenerator, resource);
@@ -197,16 +197,12 @@ public class HALJsonSerializer
 
             for (String rel : relations) {
                 jsonGenerator.writeFieldName(rel);
-                List<HALLink> links = resource.getLinks(rel);
+                Collection<HALLink> links = resource.getLinks(rel);
+                boolean isArray = links.size() > 1;
 
-                if (links.size() > 1) {
-                    jsonGenerator.writeStartArray();
-                    for (HALLink link : links) writeLinkObject(jsonGenerator, link);
-                    jsonGenerator.writeEndArray();
-                }
-                else if (links.size() == 1) {
-                    writeLinkObject(jsonGenerator, links.get(0));
-                }
+                if (isArray) jsonGenerator.writeStartArray();
+                for (HALLink link : links) writeLinkObject(jsonGenerator, link);
+                if (isArray) jsonGenerator.writeEndArray();
             }
             jsonGenerator.writeEndObject();
         }
@@ -219,16 +215,12 @@ public class HALJsonSerializer
 
             for (String rel : relations) {
                 jsonGenerator.writeFieldName(rel);
-                List<HALResource> resources = resource.getResources(rel);
+                Collection<HALResource> resources = resource.getResources(rel);
+                boolean isArray = resources.size() > 1;
 
-                if (resources.size() > 1) {
-                    jsonGenerator.writeStartArray();
-                    for (HALResource embed : resources) writeResource(jsonGenerator, embed);
-                    jsonGenerator.writeEndArray();
-                }
-                else if (resources.size() == 1) {
-                    writeResource(jsonGenerator, resources.get(0));
-                }
+                if (isArray) jsonGenerator.writeStartArray();
+                for (HALResource embed : resources) writeResource(jsonGenerator, embed);
+                if (isArray) jsonGenerator.writeEndArray();
             }
             jsonGenerator.writeEndObject();
         }

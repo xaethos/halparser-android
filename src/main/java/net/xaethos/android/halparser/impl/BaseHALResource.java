@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,8 +42,13 @@ public class BaseHALResource implements HALResource
     }
 
     @Override
-    public Map<String, ? extends HALProperty> getProperties() {
-        return Collections.unmodifiableMap(mProperties);
+    public Collection<HALProperty> getProperties() {
+        return Collections.unmodifiableCollection(mProperties.values());
+    }
+
+    @Override
+    public Collection<String> getPropertyNames() {
+        return Collections.unmodifiableCollection(mProperties.keySet());
     }
 
     @Override

@@ -2,8 +2,7 @@ package net.xaethos.android.halparser;
 
 import android.os.Parcelable;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Collection;
 import java.util.Set;
 
 public interface HALResource extends Parcelable
@@ -15,7 +14,8 @@ public interface HALResource extends Parcelable
     public void setProperty(HALProperty property);
     public void removeProperty(String name);
 
-    public Map<String, ? extends HALProperty> getProperties();
+    public Collection<HALProperty> getProperties();
+    public Collection<String> getPropertyNames();
 
     public Object getValue(String propertyName);
     public String getValueString(String propertyName);
@@ -24,7 +24,7 @@ public interface HALResource extends Parcelable
     /* Links */
 
     public HALLink getLink(String rel);
-    public List<HALLink> getLinks(String rel);
+    public Collection<HALLink> getLinks(String rel);
     public void addLink(HALLink link);
     public void removeLink(HALLink link);
 
@@ -33,7 +33,7 @@ public interface HALResource extends Parcelable
     /* Embedded resources */
 
     public HALResource getResource(String rel);
-    public List<HALResource> getResources(String rel);
+    public Collection<HALResource> getResources(String rel);
     public void addResource(HALResource resource, String rel);
     public void removeResource(HALResource resource, String rel);
 

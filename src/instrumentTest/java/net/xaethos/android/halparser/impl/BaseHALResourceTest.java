@@ -4,7 +4,12 @@ import net.xaethos.android.halparser.HALLink;
 import net.xaethos.android.halparser.HALParserTestCase;
 import net.xaethos.android.halparser.HALProperty;
 import net.xaethos.android.halparser.HALResource;
+import net.xaethos.android.halparser.tests.R;
 
+import java.util.Collection;
+
+import static net.xaethos.android.halparser.matchers.HALLinkMatcher.halLinkTo;
+import static net.xaethos.android.halparser.matchers.HALPropertyMatcher.halProperty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
@@ -55,6 +60,28 @@ public class BaseHALResourceTest extends HALParserTestCase
         assertThat(resource.getProperty("foo"), is(nullValue()));
     }
 
+    public void testGetProperties() throws Exception {
+        resource = newResource(R.raw.example);
+        Collection<HALProperty> properties = resource.getProperties();
+
+        assertThat(properties, contains(
+                halProperty("age", 33),
+                halProperty("expired", false),
+                halProperty("id", 123456),
+                halProperty("name", "Example Resource"),
+                halProperty("optional", true)
+        ));
+        assertUnmodifiable(properties);
+    }
+
+    public void testGetPropertyNames() throws Exception {
+        resource = newResource(R.raw.example);
+        Collection<String> names = resource.getPropertyNames();
+
+        assertThat(names, contains("age", "expired", "id", "name", "optional"));
+        assertUnmodifiable(names);
+    }
+
     public void testSetValue() {
         Object value = new Object();
 
@@ -84,19 +111,41 @@ public class BaseHALResourceTest extends HALParserTestCase
         assertThat(resource.getValueString("missing_value"), is(nullValue()));
     }
 
+    public void testGetLinkRels() throws Exception {
+        resource = newResource(R.raw.example);
+        assertThat(resource.getLinkRels(), contains("curie", "self", "ns:parent", "ns:users"));
+        assertUnmodifiable(resource.getLinkRels());
+    }
+
+    public void testGetLinks() throws Exception {
+        resource = newResource(R.raw.example);
+
+        assertThat(resource.getLinks("self"), contains(
+                halLinkTo("https://example.com/api/customer/123456")
+        ));
+        assertThat(resource.getLinks("curie"), contains(
+                halLinkTo("https://example.com/apidocs/accounts"),
+                halLinkTo("https://example.com/apidocs/roles")
+        ));
+        assertThat(resource.getLinks("bad rel"), is(empty()));
+
+        assertUnmodifiable(resource.getLinks("self"));
+    }
+
     public void testAddLink() {
-        resource.addLink(new BaseHALLink("sibling", "/bundle/4"));
-        resource.addLink(new BaseHALLink("item", "/item/2"));
-        resource.addLink(new BaseHALLink("item", "/item/13"));
+        HALLink sibling = new BaseHALLink("sibling", "/bundle/4");
+        HALLink items[] = {
+                new BaseHALLink("item", "/item/2"),
+                new BaseHALLink("item", "/item/13")
+        };
+
+        resource.addLink(sibling);
+        resource.addLink(items[0]);
+        resource.addLink(items[1]);
 
         assertThat(resource.getLinkRels(), contains("sibling", "item"));
-
-        assertThat(resource.getLinks("sibling"), hasSize(1));
-        assertThat(resource.getLinks("sibling").get(0).getHref(), is("/bundle/4"));
-
-        assertThat(resource.getLinks("item"), hasSize(2));
-        assertThat(resource.getLinks("item").get(0).getHref(), is("/item/2"));
-        assertThat(resource.getLinks("item").get(1).getHref(), is("/item/13"));
+        assertThat(resource.getLinks("sibling"), contains(sibling));
+        assertThat(resource.getLinks("item"), contains(items));
     }
 
     public void testRemoveLink() {
@@ -115,9 +164,7 @@ public class BaseHALResourceTest extends HALParserTestCase
         resource.removeLink(link);
 
         assertThat(resource.getLinkRels(), contains("item"));
-
-        assertThat(resource.getLinks("item"), hasSize(1));
-        assertThat(resource.getLinks("item").get(0).getHref(), is("/item/13"));
+        assertThat(resource.getLinks("item"), contains(halLinkTo("/item/13")));
     }
 
     public void testAddResource() {

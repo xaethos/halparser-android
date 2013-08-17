@@ -2,13 +2,17 @@ package net.xaethos.android.halparser.serializers;
 
 import net.xaethos.android.halparser.HALLink;
 import net.xaethos.android.halparser.HALParserTestCase;
-import net.xaethos.android.halparser.HALProperty;
 import net.xaethos.android.halparser.HALResource;
 import net.xaethos.android.halparser.tests.R;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+
+import static net.xaethos.android.halparser.matchers.HALLinkMatcher.halLinkTo;
+import static net.xaethos.android.halparser.matchers.HALPropertyMatcher.halProperty;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 
 public class HALJsonSerializerReadTest extends HALParserTestCase
 {
@@ -59,20 +63,16 @@ public class HALJsonSerializerReadTest extends HALParserTestCase
         assertEquals(1.3, resource.getValue("double"));
     }
 
-    public void testPropertiesMap() throws Exception {
+    public void testPropertiesCollections() throws Exception {
         resource = newResource(R.raw.example);
 
-        Map<String, ? extends HALProperty> properties = resource.getProperties();
-        String[] names = new String[5];
-        names = properties.keySet().toArray(names);
-        assertEquals(5, names.length);
-        assertEquals("age", names[0]);
-        assertEquals("expired", names[1]);
-        assertEquals("id", names[2]);
-        assertEquals("name", names[3]);
-        assertEquals("optional", names[4]);
-
-        assertUnmodifiable(properties);
+        assertThat(resource.getProperties(), contains(
+                halProperty("age", 33),
+                halProperty("expired", false),
+                halProperty("id", 123456),
+                halProperty("name", "Example Resource"),
+                halProperty("optional", true)
+        ));
     }
 
     public void testExampleWithLink() throws Exception {
@@ -86,16 +86,11 @@ public class HALJsonSerializerReadTest extends HALParserTestCase
 
     public void testExampleWithLinkArrays() throws Exception {
         resource = newResource(R.raw.example);
-        List<HALLink> links;
-        links = resource.getLinks("curie");
-        assertNotNull(links);
-        assertEquals(2, links.size());
-        assertEquals("https://example.com/apidocs/accounts", links.get(0).getHref());
-        assertEquals("https://example.com/apidocs/roles", links.get(1).getHref());
 
-        assertUnmodifiable(links);
-
-        assertEquals("https://example.com/apidocs/accounts", resource.getLink("curie").getHref());
+        assertThat(resource.getLinks("curie"), contains(
+                halLinkTo("https://example.com/apidocs/accounts"),
+                halLinkTo("https://example.com/apidocs/roles")
+        ));
     }
 
     public void testLinkRels() throws Exception {
@@ -140,14 +135,13 @@ public class HALJsonSerializerReadTest extends HALParserTestCase
 
     public void testExampleWithSubresourceArrays() throws Exception {
         resource = newResource(R.raw.example_with_multiple_subresources);
-        List<HALResource> subresources;
-        subresources = resource.getResources("ns:user");
-        assertNotNull(subresources);
-        assertEquals(2, subresources.size());
-        assertEquals("https://example.com/user/11", subresources.get(0).getLink("self").getHref());
-        assertEquals("https://example.com/user/12", subresources.get(1).getLink("self").getHref());
+        List<HALResource> embedded = new ArrayList<HALResource>(resource.getResources("ns:user"));
+        assertNotNull(embedded);
+        assertEquals(2, embedded.size());
+        assertEquals("https://example.com/user/11", embedded.get(0).getLink("self").getHref());
+        assertEquals("https://example.com/user/12", embedded.get(1).getLink("self").getHref());
 
-        assertUnmodifiable(subresources);
+        assertUnmodifiable(resource.getResources("ns:user"));
 
         assertEquals("https://example.com/user/11", resource.getResource("ns:user").getLink("self").getHref());
     }
