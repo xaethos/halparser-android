@@ -18,6 +18,7 @@ public interface HALResource extends Parcelable
     public Map<String, ? extends HALProperty> getProperties();
 
     public Object getValue(String propertyName);
+    public String getValueString(String propertyName);
     public void setValue(String propertyName, Object value);
 
     /* Links */

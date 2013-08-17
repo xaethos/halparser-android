@@ -73,6 +73,17 @@ public class BaseHALResourceTest extends HALParserTestCase
         assertThat(resource.getValue("bar"), is(nullValue()));
     }
 
+    public void testGetValueString() {
+        resource.setValue("string", "foo");
+        resource.setValue("int", 13);
+        resource.setValue("null", null);
+
+        assertThat(resource.getValueString("string"), is("foo"));
+        assertThat(resource.getValueString("int"), is("13"));
+        assertThat(resource.getValueString("null"), is(nullValue()));
+        assertThat(resource.getValueString("missing_value"), is(nullValue()));
+    }
+
     public void testAddLink() {
         resource.addLink(new BaseHALLink("sibling", "/bundle/4"));
         resource.addLink(new BaseHALLink("item", "/item/2"));

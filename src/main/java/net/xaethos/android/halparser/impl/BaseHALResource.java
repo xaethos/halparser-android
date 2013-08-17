@@ -52,6 +52,12 @@ public class BaseHALResource implements HALResource
     }
 
     @Override
+    public String getValueString(String propertyName) {
+        Object value = getValue(propertyName);
+        return value == null ? null : value.toString();
+    }
+
+    @Override
     public void setValue(String propertyName, Object value) {
         setProperty(new Property(propertyName, value));
     }
