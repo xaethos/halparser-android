@@ -16,6 +16,7 @@ import java.util.Set;
 
 public class BaseHALLink implements HALLink
 {
+    private static final String ATTR_NAME = "name";
     private static final String ATTR_TITLE = "title";
 
     private final String mRel;
@@ -43,13 +44,13 @@ public class BaseHALLink implements HALLink
     }
 
     @Override
-    public String getRel() {
-        return mRel;
+    public String getHref() {
+        return mHref;
     }
 
     @Override
-    public String getHref() {
-        return mHref;
+    public String getRel() {
+        return mRel;
     }
 
     @Override
@@ -94,14 +95,25 @@ public class BaseHALLink implements HALLink
     }
 
     @Override
+    public String getName() {
+        return getAttributeString(ATTR_NAME);
+    }
+
+    @Override
     public String getTitle() {
-        Object val = mAttributes.get(ATTR_TITLE);
-        return val == null ? null : val.toString();
+        return getAttributeString(ATTR_TITLE);
     }
 
     @Override
     public boolean isTemplated() {
         return !mTemplate.getVariableNames().isEmpty();
+    }
+
+    // *** Helpers
+
+    private String getAttributeString(String name) {
+        Object val = mAttributes.get(name);
+        return val == null ? null : val.toString();
     }
 
     // *** Parcelable implementation

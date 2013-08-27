@@ -123,6 +123,19 @@ public class BaseHALLinkTest extends HALParserTestCase
         assertThat(link.getAttributes().size(), is(0));
     }
 
+    public void testGetName() throws Exception {
+        HALLink link;
+
+        link = new BaseHALLink("foo", "/foo");
+        assertThat(link.getName(), is(nullValue()));
+
+        link = new BaseHALLink("foo", "/foo", singletonMap("name", "Foontastic"));
+        assertThat(link.getName(), is("Foontastic"));
+
+        link = new BaseHALLink("foo", "/foo", singletonMap("name", 42));
+        assertThat(link.getName(), is("42"));
+    }
+
     public void testGetTitle() throws Exception {
         HALLink link;
 

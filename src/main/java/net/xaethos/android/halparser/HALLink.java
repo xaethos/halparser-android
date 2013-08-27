@@ -8,9 +8,8 @@ import java.util.Set;
 
 public interface HALLink extends Parcelable
 {
-
-    public String getRel();
     public String getHref();
+    public String getRel();
 
     public Object getAttribute(String name);
     public void setAttribute(String name, Object value);
@@ -23,6 +22,7 @@ public interface HALLink extends Parcelable
 
     public Set<String> getVariables();
 
+    public String getName();
     public String getTitle();
     public boolean isTemplated();
 
