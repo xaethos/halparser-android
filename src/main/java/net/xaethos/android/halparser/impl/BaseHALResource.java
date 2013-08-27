@@ -59,8 +59,8 @@ public class BaseHALResource implements HALResource
 
     @Override
     public String getValueString(String propertyName) {
-        Object value = getValue(propertyName);
-        return value == null ? null : value.toString();
+        HALProperty property = mProperties.get(propertyName);
+        return property == null ? null : property.getValueString();
     }
 
     @Override
@@ -146,8 +146,7 @@ public class BaseHALResource implements HALResource
     private <T> List<T> getAll(Map<String, ArrayList<T>> map, String key) {
         if (map.containsKey(key)) {
             return Collections.unmodifiableList(map.get(key));
-        }
-        else {
+        } else {
             return Collections.emptyList();
         }
     }
@@ -192,8 +191,7 @@ public class BaseHALResource implements HALResource
 
     // ***** Inner classes
 
-    public static class Property implements HALProperty
-    {
+    public static class Property implements HALProperty {
         public final String name;
         public final Object value;
 
@@ -210,6 +208,11 @@ public class BaseHALResource implements HALResource
         @Override
         public Object getValue() {
             return value;
+        }
+
+        @Override
+        public String getValueString() {
+            return value == null ? null : value.toString();
         }
     }
 

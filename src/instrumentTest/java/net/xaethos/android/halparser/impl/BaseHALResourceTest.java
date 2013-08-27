@@ -19,8 +19,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 
-public class BaseHALResourceTest extends HALParserTestCase
-{
+public class BaseHALResourceTest extends HALParserTestCase {
 
     HALResource resource;
 
@@ -44,6 +43,7 @@ public class BaseHALResourceTest extends HALParserTestCase
         HALProperty property = new HALProperty() {
             @Override public String getName() { return "foo"; }
             @Override public Object getValue() { return null; }
+            @Override public String getValueString() { return null; }
         };
 
         resource.setProperty(property);
@@ -101,10 +101,17 @@ public class BaseHALResourceTest extends HALParserTestCase
     public void testGetValueString() {
         resource.setValue("string", "foo");
         resource.setValue("int", 13);
+        resource.setValue("bool", true);
         resource.setValue("null", null);
+
+        assertThat(resource.getProperty("string").getValueString(), is("foo"));
+        assertThat(resource.getProperty("int").getValueString(), is("13"));
+        assertThat(resource.getProperty("bool").getValueString(), is("true"));
+        assertThat(resource.getProperty("null").getValueString(), is(nullValue()));
 
         assertThat(resource.getValueString("string"), is("foo"));
         assertThat(resource.getValueString("int"), is("13"));
+        assertThat(resource.getValueString("bool"), is("true"));
         assertThat(resource.getValueString("null"), is(nullValue()));
         assertThat(resource.getValueString("missing_value"), is(nullValue()));
     }
