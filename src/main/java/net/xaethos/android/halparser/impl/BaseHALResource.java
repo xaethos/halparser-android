@@ -192,27 +192,27 @@ public class BaseHALResource implements HALResource
     // ***** Inner classes
 
     public static class Property implements HALProperty {
-        public final String name;
-        public final Object value;
+        private final String mName;
+        private final Object mValue;
 
         public Property(String name, Object value) {
-            this.name = name;
-            this.value = value;
+            this.mName = name;
+            this.mValue = value;
         }
 
         @Override
         public String getName() {
-            return name;
+            return mName;
         }
 
         @Override
         public Object getValue() {
-            return value;
+            return mValue;
         }
 
         @Override
         public String getValueString() {
-            return value == null ? null : value.toString();
+            return mValue == null ? null : mValue.toString();
         }
     }
 
