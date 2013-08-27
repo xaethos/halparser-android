@@ -44,8 +44,6 @@ public class BaseHALResourceTest extends HALParserTestCase
         HALProperty property = new HALProperty() {
             @Override public String getName() { return "foo"; }
             @Override public Object getValue() { return null; }
-            @Override public String getType() { return null; }
-            @Override public String getTitle() { return null; }
         };
 
         resource.setProperty(property);

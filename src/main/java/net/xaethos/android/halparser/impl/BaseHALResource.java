@@ -211,16 +211,6 @@ public class BaseHALResource implements HALResource
         public Object getValue() {
             return value;
         }
-
-        @Override
-        public String getType() {
-            return null;
-        }
-
-        @Override
-        public String getTitle() {
-            return null;
-        }
     }
 
 }
