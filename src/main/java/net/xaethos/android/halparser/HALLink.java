@@ -18,12 +18,12 @@ public interface HALLink extends Parcelable
     public Map<String, ?> getAttributes();
 
     public URI getURI();
-    public URI getURI(Map<String, Object> map);
+//    public URI getURI(Map<String, Object> map);
 
-    public Set<String> getVariables();
+//    public Set<String> getVariables();
 
     public String getName();
     public String getTitle();
-    public boolean isTemplated();
+//    public boolean isTemplated();
 
 }

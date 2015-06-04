@@ -236,7 +236,7 @@ public class HALJsonSerializer
             jsonGenerator.writeObjectField(name, entry.getValue());
         }
 
-        if (link.isTemplated()) jsonGenerator.writeObjectField(TEMPLATED, true);
+//        if (link.isTemplated()) jsonGenerator.writeObjectField(TEMPLATED, true);
 
         jsonGenerator.writeEndObject();
     }

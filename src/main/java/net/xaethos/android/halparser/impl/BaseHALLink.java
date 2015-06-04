@@ -3,8 +3,6 @@ package net.xaethos.android.halparser.impl;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.scurrilous.uritemplate.URITemplate;
-
 import net.xaethos.android.halparser.HALLink;
 
 import java.net.URI;
@@ -12,17 +10,17 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
-public class BaseHALLink implements HALLink
-{
+//import com.scurrilous.uritemplate.URITemplate;
+
+public class BaseHALLink implements HALLink {
     private static final String ATTR_NAME = "name";
     private static final String ATTR_TITLE = "title";
 
     private final String mRel;
     private final String mHref;
     private final HashMap<String, Object> mAttributes;
-    private final URITemplate mTemplate;
+//    private final URITemplate mTemplate;
 
     public BaseHALLink(String rel, String href) {
         this(rel, href, null);
@@ -33,12 +31,11 @@ public class BaseHALLink implements HALLink
 
         mRel = rel;
         mHref = href;
-        mTemplate = new URITemplate(mHref);
+//        mTemplate = new URITemplate(mHref);
 
         if (attributes == null) {
             mAttributes = new HashMap<String, Object>();
-        }
-        else {
+        } else {
             mAttributes = new HashMap<String, Object>(attributes);
         }
     }
@@ -75,24 +72,29 @@ public class BaseHALLink implements HALLink
 
     @Override
     public URI getURI() {
-        Map<String, Object> map = Collections.emptyMap();
-        return getURI(map);
-    }
-
-    @Override
-    public URI getURI(Map<String, Object> map) {
         try {
-            return mTemplate.expand(map);
-        }
-        catch (URISyntaxException e) {
+            return new URI(mHref);
+        } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+//        Map<String, Object> map = Collections.emptyMap();
+//        return getURI(map);
     }
 
-    @Override
-    public Set<String> getVariables() {
-        return mTemplate.getVariableNames();
-    }
+//    @Override
+//    public URI getURI(Map<String, Object> map) {
+//        try {
+//            return mTemplate.expand(map);
+//        }
+//        catch (URISyntaxException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+
+//    @Override
+//    public Set<String> getVariables() {
+//        return mTemplate.getVariableNames();
+//    }
 
     @Override
     public String getName() {
@@ -104,10 +106,10 @@ public class BaseHALLink implements HALLink
         return getAttributeString(ATTR_TITLE);
     }
 
-    @Override
-    public boolean isTemplated() {
-        return !mTemplate.getVariableNames().isEmpty();
-    }
+//    @Override
+//    public boolean isTemplated() {
+//        return !mTemplate.getVariableNames().isEmpty();
+//    }
 
     // *** Helpers
 
@@ -138,7 +140,7 @@ public class BaseHALLink implements HALLink
         HashMap<String, Object> attributes = new HashMap<String, Object>();
         in.readMap(attributes, null);
         mAttributes = attributes;
-        mTemplate = new URITemplate(mHref);
+//        mTemplate = new URITemplate(mHref);
     }
 
     @Override
