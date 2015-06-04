@@ -1,35 +1,34 @@
 buildscript {
-  repositories {
-    mavenCentral()
-  }
-
-  dependencies {
-    classpath 'com.android.tools.build:gradle:0.5.+'
-  }
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.2.3'
+    }
 }
 
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 
 repositories {
-  mavenCentral()
-}
-
-dependencies {
-  compile(
-    'com.scurrilous:uritemplate:1.0',
-    'com.fasterxml.jackson.core:jackson-core:2.2.+'
-  )
-
-  instrumentTestCompile(
-    'org.hamcrest:hamcrest-all:1.3'
-  )
+    jcenter()
 }
 
 android {
-  buildToolsVersion = '17.0.0'
-  compileSdkVersion 17
+    compileSdkVersion 22
+    buildToolsVersion '22.0.1'
 
-  defaultConfig {
-    testPackageName 'net.xaethos.android.halparser.tests'
-  }
+//    defaultConfig {
+//        testPackageName 'net.xaethos.android.halparser.tests'
+//    }
+
+    dependencies {
+        compile(
+                'com.scurrilous:uritemplate:1.0',
+                'com.fasterxml.jackson.core:jackson-core:2.2.+'
+        )
+
+        androidTestCompile(
+                'org.hamcrest:hamcrest-all:1.3'
+        )
+    }
 }
